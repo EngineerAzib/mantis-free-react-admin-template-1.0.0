@@ -168,11 +168,12 @@ export default function Breadcrumbs({
 
     let tempContent = (
       <MuiBreadcrumbs aria-label="breadcrumb" maxItems={maxItems || 8} separator={separatorIcon}>
-        <Typography component={Link} to="/" color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
-          {icons && <HomeOutlined style={iconSX} />}
-          {icon && !icons && <HomeFilled style={{ ...iconSX, marginRight: 0 }} />}
-          {(!icon || icons) && 'Home'}
-        </Typography>
+        {item?.breadcrumbs !== false && (
+          <Typography component={Link} to="/" color="text.secondary" variant="h6" sx={{ textDecoration: 'none' }}>
+            {icons && <HomeOutlined style={iconSX} />}
+            {(!icon || icons) && 'Home'}
+          </Typography>
+        )}
         {mainContent}
         {itemContent}
       </MuiBreadcrumbs>

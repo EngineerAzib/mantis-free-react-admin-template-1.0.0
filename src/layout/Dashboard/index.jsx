@@ -14,14 +14,11 @@ import Breadcrumbs from 'components/@extended/Breadcrumbs';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 
-// ==============================|| MAIN LAYOUT ||============================== //
-
 export default function DashboardLayout() {
   const { pathname } = useLocation();
   const { menuMasterLoading } = useGetMenuMaster();
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
 
-  // set media wise responsive drawer
   useEffect(() => {
     handlerDrawerOpen(!downXL);
   }, [downXL]);
@@ -44,7 +41,7 @@ export default function DashboardLayout() {
             flexDirection: 'column'
           }}
         >
-          {pathname !== '/apps/profiles/account/my-account' && <Breadcrumbs />}
+          {pathname !== '/apps/profiles/account/my-account' && pathname !== '/pos' && <Breadcrumbs />}
           <Outlet />
           <Footer />
         </Box>

@@ -310,8 +310,10 @@ const CompanyPage = memo(
           handleClose={functions.handleClose(setModalState, setFormData, initialData)}
           handleSubmit={() => storeMutation.mutate()}
           isStepValid={() => {
-            console.log('CompanyPage: Validating store', formData.store);
-            return !!formData.store.name && !!formData.store.companyId;
+            const storeNameValid = !!formData.store.StoreName;
+            const companyIdValid = !!formData.store.companyId;
+            console.log('Store validation details:', { storeNameValid, companyIdValid, StoreName: formData.store.StoreName, companyId: formData.store.companyId });
+            return storeNameValid && companyIdValid;
           }}
           title="Add Store"
           isMultiStep={false}

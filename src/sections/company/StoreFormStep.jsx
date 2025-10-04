@@ -9,11 +9,15 @@ const StoreFormStep = ({
   handleCheckboxChange, 
   companiesData = [] 
 }) => {
-  // Debug logs
+  // Extract companyId safely to avoid undefined errors
+  const companyId = formData.companyId || '';
+
+  // Debug logs with safe access to avoid toString on undefined
   console.log('Current formData:', formData);
   console.log('Available companies:', companiesData);
+  console.log('Selected companyId:', companyId, 'Type:', typeof companyId);
   console.log('Selected company:', 
-    companiesData.find(c => c.id.toString() === formData.companyId?.toString())
+    companiesData.find(c => String(c.companyId) === String(companyId))
   );
 
   return (
@@ -35,29 +39,45 @@ const StoreFormStep = ({
         sx={fieldStyles}
       />
       
-  
       <Select
         fullWidth
         value={companyId}
-        onChange={handleInputChange('store', 'companyId')}
+        onChange={(event) => {
+          const selectedValue = event.target.value;
+          console.log('Select onChange - selectedValue:', selectedValue, 'Type:', typeof selectedValue);
+          console.log('companiesData:', companiesData);
+          handleInputChange('store', 'companyId')(event);
+        }}
         displayEmpty
         renderValue={(selected) => {
-          if (!selected) return 'Select Company';
+          console.log('renderValue called with selected:', selected, 'Type:', typeof selected);
+          if (!selected) {
+            console.log('No selected value, returning "Select Company"');
+            return 'Select Company';
+          }
+          console.log('companiesData:', companiesData);
+          console.log('selected:', selected);
+          console.log('companiesData.find(c => String(c.companyId) === String(selected)):', companiesData.find(c => String(c.companyId) === String(selected)));
           const company = companiesData.find(c => 
-            String(c.id) === String(selected)
+            String(c.companyId) === String(selected)
           );
-          return company?.name || 'Selected Company';
+          console.log('Found company:', company);
+          if (company) {
+            return company.name;
+          } else {
+            console.warn('No company found for selected ID:', selected, 'Available companyIds:', companiesData.map(c => ({ companyId: c.companyId, type: typeof c.companyId })));
+            return `Selected Company (ID: ${selected})`;
+          }
         }}
         sx={selectStyles}
       >
         <MenuItem value="" disabled>Select Company</MenuItem>
         {companiesData.map((company) => (
-          <MenuItem key={company.id} value={company.id}>
+          <MenuItem key={company.companyId} value={company.companyId}>
             {company.name}
           </MenuItem>
         ))}
       </Select>
-
 
       <TextField
         fullWidth
@@ -129,7 +149,7 @@ StoreFormStep.propTypes = {
   handleCheckboxChange: PropTypes.func.isRequired,
   companiesData: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      companyId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       name: PropTypes.string.isRequired
     })
   )

@@ -6,6 +6,13 @@ import DashboardLayout from 'layout/Dashboard';
 import LoginPage from 'pages/auth/Login';
 import { AuthContext } from 'contexts/AuthContext';
 import CompanyPage from 'pages/company/company';
+import CategoryPage from '../pages/category/CategoryPage';
+import ProductPage from '../pages/product/ProductPage';
+import SupplierPage from '../pages/supplier/SupplierPage';
+import PurchaseOrderPage from '../pages/purchaseOrder/PurchaseOrderPage';
+import ExpensePage from '../pages/expense/ExpensePage';
+import StaffPage from '../pages/staff/StaffPage';
+import PosPage from '../pages/POS/PosPage';
 
 // Lazy-loaded components
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -40,7 +47,7 @@ const router = createBrowserRouter(
         </AuthRedirectRoute>
       ),
     },
-    {
+    { 
       path: '/reset-password',
       element: (
         <AuthRedirectRoute>
@@ -58,15 +65,68 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <DashboardDefault /> },
         { path: 'dashboard/default', element: <DashboardDefault /> },
-        { path: 'typography', element: <Typography /> },
-        { path: 'color', element: <Color /> },
-        { path: 'shadow', element: <Shadow /> },
-        { path: 'sample-page', element: <SamplePage /> },
+      
         {
           path: 'company',
           element: (
             <ProtectedRoute>
               <CompanyPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'category',
+          element: (
+            <ProtectedRoute>
+              <CategoryPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'product',
+          element: (
+            <ProtectedRoute>
+              <ProductPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'purchase-order',
+          element: (
+            <ProtectedRoute>
+              <PurchaseOrderPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'supplier',
+          element: (
+            <ProtectedRoute>
+              <SupplierPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'expense',
+          element: (
+            <ProtectedRoute>
+              <ExpensePage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'staff',
+          element: (
+            <ProtectedRoute>
+              <StaffPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'pos',
+          element: (
+            <ProtectedRoute>
+              <PosPage />
             </ProtectedRoute>
           ),
         },
