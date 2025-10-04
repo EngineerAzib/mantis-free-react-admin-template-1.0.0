@@ -231,7 +231,7 @@ const CompanyPage = memo(
               No Companies Added
             </Typography>
             <Button
-              onClick={functions.handleOpenModal(setModalState)}
+              onClick={() => functions.handleOpenModal(setModalState)('company')}
               startIcon={<Plus size={18} />}
               variant="contained"
               sx={{
@@ -268,7 +268,7 @@ const CompanyPage = memo(
           </Box>
         )}
         <GenericFormModal
-          open={modalState.type === 'companie' && modalState.open}
+          open={modalState.type === 'company' && modalState.open}
           activeStep={modalState.activeStep}
           steps={companySteps}
           formData={formData.company}

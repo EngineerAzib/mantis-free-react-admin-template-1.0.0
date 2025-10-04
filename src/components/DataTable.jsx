@@ -122,7 +122,16 @@ const DataTable = ({
             Export
           </Button>
           <Button
-            onClick={() => handleOpenModal(tableTitle.toLowerCase().slice(0, -1))}
+            onClick={() => {
+              // Map table titles to modal types
+              const modalTypeMap = {
+                'companies': 'company',
+                'stores': 'store', 
+                'users': 'user'
+              };
+              const modalType = modalTypeMap[tableTitle.toLowerCase()] || tableTitle.toLowerCase().slice(0, -1);
+              handleOpenModal(modalType);
+            }}
             startIcon={<Plus size={16} />}
             variant="contained"
             sx={{ px: 2, py: 1, fontSize: '0.875rem', textTransform: 'none' }}
