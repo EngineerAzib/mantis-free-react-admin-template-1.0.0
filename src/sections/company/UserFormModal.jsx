@@ -63,7 +63,7 @@ const UserFormStep = ({
         renderValue={(selected) => {
           if (!selected) return 'Select Company';
           const company = companiesData.find(c => 
-            String(c.companyId) === String(selected)  // Use companyId from your data structure
+            String(c.id) === String(selected) || String(c.companyId) === String(selected)
           );
           console.log('UserFormStep: renderValue company selected:', selected, 'Found:', company);
           return company?.name || `Selected Company (ID: ${selected})`;
@@ -73,7 +73,7 @@ const UserFormStep = ({
       >
         <MenuItem value="" disabled>Select Company</MenuItem>
         {companiesData.map((company) => (
-          <MenuItem key={company.companyId} value={company.companyId}>  {/* Use companyId */}
+          <MenuItem key={company.id || company.companyId} value={company.id || company.companyId}>
             {company.name}
           </MenuItem>
         ))}

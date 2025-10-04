@@ -363,8 +363,10 @@ export const handleUserSubmit = (formData, companiesData, storesData, onSubmit, 
     setMessage({ open: true, message: 'Name, email, and role are required!', severity: 'error' });
     return;
   }
-  const company = companiesData.find((c) => c.id === parseInt(companyId));
-  const store = storesData.find((s) => s.id === parseInt(storeId));
+  const company = companiesData.find((c) => 
+    String(c.id) === String(companyId) || String(c.companyId) === String(companyId)
+  );
+  const store = storesData.find((s) => String(s.id) === String(storeId));
   const newUser = {
     id: storesData.length + 1,
     name,

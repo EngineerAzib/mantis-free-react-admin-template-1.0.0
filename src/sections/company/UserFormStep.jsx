@@ -58,7 +58,14 @@ const UserFormStep = ({ formData, handleInputChange, companiesData, storesData }
         value={formData.companyId || ''}
         onChange={handleInputChange('user', 'companyId')}
         displayEmpty
-        renderValue={(value) => (value ? companiesData.find((c) => c.id === parseInt(value))?.name || 'Select Company' : 'Select Company')}
+        renderValue={(selected) => {
+          if (!selected) return 'Select Company';
+          const company = companiesData.find(c => 
+            String(c.id) === String(selected) || String(c.companyId) === String(selected)
+          );
+          console.log('UserFormStep: renderValue company selected:', selected, 'Found:', company);
+          return company?.name || `Selected Company (ID: ${selected})`;
+        }}
         sx={{
           '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.300' },
           '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.500' },
@@ -69,7 +76,7 @@ const UserFormStep = ({ formData, handleInputChange, companiesData, storesData }
           Select Company
         </MenuItem>
         {companiesData.map((company) => (
-          <MenuItem key={company.id} value={company.id}>
+          <MenuItem key={company.id || company.companyId} value={company.id || company.companyId}>
             {company.name}
           </MenuItem>
         ))}
@@ -79,7 +86,15 @@ const UserFormStep = ({ formData, handleInputChange, companiesData, storesData }
         value={formData.storeId || ''}
         onChange={handleInputChange('user', 'storeId')}
         displayEmpty
-        renderValue={(value) => (value ? storesData.find((s) => s.id === parseInt(value))?.name || 'Select Store' : 'Select Store')}
+        disabled={!formData.companyId}
+        renderValue={(selected) => {
+          if (!selected) return 'Select Store';
+          const store = storesData.find(s => 
+            String(s.id) === String(selected)
+          );
+          console.log('UserFormStep: renderValue store selected:', selected, 'Found:', store);
+          return store?.name || `Selected Store (ID: ${selected})`;
+        }}
         sx={{
           '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.300' },
           '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.500' },
@@ -89,7 +104,9 @@ const UserFormStep = ({ formData, handleInputChange, companiesData, storesData }
         <MenuItem value="" disabled>
           Select Store
         </MenuItem>
-        {storesData.filter((s) => s.companyId === parseInt(formData.companyId)).map((store) => (
+        {storesData.filter((s) => 
+          String(s.companyId) === String(formData.companyId)
+        ).map((store) => (
           <MenuItem key={store.id} value={store.id}>
             {store.name}
           </MenuItem>
