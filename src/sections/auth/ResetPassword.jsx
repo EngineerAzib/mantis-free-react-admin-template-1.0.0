@@ -130,7 +130,7 @@ const ResetPassword = () => {
                 'Password cannot start or end with spaces',
                 (value) => (value ? value.trim() === value : true)
               )
-              .max(10, 'Password must be less than 10 characters'),
+              .max(20, 'Password must be less than 10 characters'),
             confirmPassword: Yup.string()
               .required('Confirm password is required')
               .oneOf([Yup.ref('password'), null], 'Passwords must match')
