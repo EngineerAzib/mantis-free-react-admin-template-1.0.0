@@ -56,7 +56,21 @@ const CompanyPage = memo(
     IsMainBranch: false,
     Address: '' 
   },
-      user: { name: '', email: '', role: '', companyId: '', storeId: '', joinDate: '' },
+      user: { 
+        username: '', 
+        email: '', 
+        fullName: '', 
+        address: '', 
+        cnic: '', 
+        phoneNumber: '', 
+        gender: '', 
+        role: '', 
+        companyId: '', 
+        storeId: '', 
+        password: '', 
+        confirmPassword: '', 
+        joinDate: '' 
+      },
       ...initialData,
     });
 
@@ -72,11 +86,28 @@ const CompanyPage = memo(
     const [userSearch, setUserSearch] = useState('');
 
     // Fetch data with react-query
-    const { data: companiesResponse = { items: [], totalCount: 0 }, isLoading: isCompaniesLoading } = useQuery({
+    const { data: companiesResponse = { items: [], totalCount: 0 }, isLoading: isCompaniesLoading, error: companiesError } = useQuery({
       queryKey: ['companies', companyPage, companyPageSize, companySearch],
       queryFn: () => functions.initialCompaniesData(companyPage, companyPageSize, companySearch),
       staleTime: 5 * 60 * 1000,
+      retry: 1, // Only retry once
+      retryDelay: 1000,
     });
+
+    // Debug logging
+    useEffect(() => {
+      console.log('🏢 Companies query state:', {
+        isLoading: isCompaniesLoading,
+        hasError: !!companiesError,
+        error: companiesError,
+        data: companiesResponse,
+        itemsLength: companiesResponse?.items?.length,
+        totalCount: companiesResponse?.totalCount
+      });
+    }, [isCompaniesLoading, companiesError, companiesResponse]);
+
+    // Test API connectivity
+    
 
     const { data: storesResponse = { items: [], totalCount: 0 }, isLoading: isStoresLoading } = useQuery({
       
@@ -89,6 +120,14 @@ const CompanyPage = memo(
       queryKey: ['users', userPage, userPageSize, userSearch],
       queryFn: () => functions.initialUsersData(userPage, userPageSize, userSearch),
       staleTime: 5 * 60 * 1000,
+    });
+
+    // Fetch authorized person info for dynamic tabs
+    const { data: authorizedPersonInfo = { role: 'Admin', tabs: [] }, isLoading: isAuthorizedPersonLoading } = useQuery({
+      queryKey: ['authorizedPersonInfo'],
+      queryFn: () => functions.initialAuthorizedPersonInfo(),
+      staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+      retry: 1,
     });
 
     // Mutations for form submissions
@@ -122,19 +161,55 @@ const CompanyPage = memo(
         ),
     });
 
-    // Validate activeTab
+    // Create dynamic tabs based on authorized person info
+    const createTabs = () => {
+      const tabMap = {
+        'Company': { id: 'companies', label: 'Companies', icon: 'Building2', count: companiesResponse.items.length },
+        'Store': { id: 'stores', label: 'Stores', icon: 'Store', count: storesResponse.items.length },
+        'User': { id: 'users', label: 'Users', icon: 'Users', count: usersResponse.items.length },
+      };
+
+      // Handle both possible API response structures
+      const tabsArray = authorizedPersonInfo.Tabs || authorizedPersonInfo.tabs || [];
+      
+      return tabsArray.map(tab => {
+        const tabName = tab.TabName || tab.tabName;
+        return {
+          ...tabMap[tabName],
+          id: tabMap[tabName]?.id || tabName.toLowerCase(),
+          label: tabMap[tabName]?.label || tabName,
+          icon: tabMap[tabName]?.icon || 'Building2',
+          count: tabMap[tabName]?.count || 0,
+        };
+      });
+    };
+
+    const tabs = createTabs();
+
+    // Validate activeTab based on available tabs
     useEffect(() => {
       console.log('CompanyPage: activeTab is', activeTab);
-      if (typeof activeTab !== 'string' || !['companies', 'stores', 'users'].includes(activeTab)) {
-        console.warn('Invalid activeTab value:', activeTab);
-        setActiveTab('companies');
+      console.log('CompanyPage: available tabs:', tabs);
+      
+      if (tabs.length > 0) {
+        const validTabIds = tabs.map(tab => tab.id);
+        if (typeof activeTab !== 'string' || !validTabIds.includes(activeTab)) {
+          console.warn('Invalid activeTab value:', activeTab, 'Available tabs:', validTabIds);
+          setActiveTab(validTabIds[0]); // Set to first available tab
+        }
       }
-    }, [activeTab]);
+    }, [activeTab, tabs]);
 
     // Log modal state changes
     useEffect(() => {
       console.log('CompanyPage: Modal state is', modalState);
     }, [modalState]);
+
+    // Log authorized person info
+    useEffect(() => {
+      console.log('CompanyPage: Authorized person info:', authorizedPersonInfo);
+      console.log('CompanyPage: Available tabs:', tabs);
+    }, [authorizedPersonInfo, tabs]);
 
     // Pagination and search handlers
     const handlePageChange = (tab, page) => {
@@ -188,7 +263,7 @@ const CompanyPage = memo(
       activeTab === 'companies' ? companiesResponse.totalCount : activeTab === 'stores' ? storesResponse.totalCount : usersResponse.totalCount;
     const currentPageValue = activeTab === 'companies' ? companyPage : activeTab === 'stores' ? storePage : userPage;
     const itemsPerPageValue = activeTab === 'companies' ? companyPageSize : activeTab === 'stores' ? storePageSize : userPageSize;
-    const isLoading = isCompaniesLoading || isStoresLoading || isUsersLoading || companyMutation.isLoading || storeMutation.isLoading || userMutation.isLoading;
+    const isLoading = isCompaniesLoading || isStoresLoading || isUsersLoading || isAuthorizedPersonLoading || companyMutation.isLoading || storeMutation.isLoading || userMutation.isLoading;
 
     const tableTitle = activeTab === 'companies' ? 'Companies' : activeTab === 'stores' ? 'Stores' : 'Users';
     const TableIcon = activeTab === 'companies' ? Building2 : activeTab === 'stores' ? Store : Users;
@@ -214,12 +289,6 @@ const CompanyPage = memo(
       },
     ];
 
-    const tabs = [
-      { id: 'companies', label: 'Companies', icon: 'Building2', count: companiesResponse.items.length },
-      { id: 'stores', label: 'Stores', icon: 'Store', count: storesResponse.items.length },
-      { id: 'users', label: 'Users', icon: 'Users', count: usersResponse.items.length },
-    ];
-
     return (
       <MainCard title={title}>
         {isLoading && <Loader />}
@@ -227,9 +296,23 @@ const CompanyPage = memo(
         {companiesResponse.items.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: { xs: 4, sm: 5 } }}>
             <Building2 size={56} sx={{ color: 'primary.main', mx: 'auto', mb: 2 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.125rem', sm: '1.25rem' } }}>
-              No Companies Added
-            </Typography>
+            {companiesError ? (
+              <>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.125rem', sm: '1.25rem' }, color: 'error.main' }}>
+                  Unable to Load Companies
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                  There was an error connecting to the server. Please check your connection and try again.
+                </Typography>
+                <Typography variant="caption" sx={{ display: 'block', mb: 2, color: 'text.secondary' }}>
+                  Error: {companiesError.message}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.125rem', sm: '1.25rem' } }}>
+                No Companies Added
+              </Typography>
+            )}
             <Button
               onClick={() => functions.handleOpenModal(setModalState)('company')}
               startIcon={<Plus size={18} />}
@@ -335,7 +418,13 @@ const CompanyPage = memo(
           handleSubmit={() => userMutation.mutate()}
           isStepValid={() => {
             console.log('CompanyPage: Validating user', formData.user);
-            return !!formData.user.name && !!formData.user.email && !!formData.user.role;
+            return !!formData.user.username && 
+                   !!formData.user.email && 
+                   !!formData.user.fullName && 
+                   !!formData.user.role && 
+                   !!formData.user.password && 
+                   !!formData.user.confirmPassword &&
+                   formData.user.password === formData.user.confirmPassword;
           }}
           title="Add User"
           isMultiStep={false}

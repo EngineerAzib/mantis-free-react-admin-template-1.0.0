@@ -61,3 +61,29 @@ export const ResetPasswordApi = async (email,password,token) => {
     throw error;
   }
 };
+
+// Register user API
+export const registerUser = async (userData) => {
+  try {
+    const response = await axios.post('/Auth/Register', userData);
+    console.log('Register response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Register error:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+    throw errorMessage;
+  }
+};
+
+// Get roles API
+export const getRoles = async () => {
+  try {
+    const response = await axios.get('/Auth/roles');
+    console.log('Roles response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Get roles error:', error);
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch roles';
+    throw errorMessage;
+  }
+};

@@ -1,9 +1,30 @@
-import React from 'react';
-import { TextField, Checkbox, FormControlLabel, Select, MenuItem, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TextField, Checkbox, FormControlLabel, Select, MenuItem, Box, CircularProgress } from '@mui/material';
+import { getRoles } from '../../api/auth';
 
 const CompanyFormStep = ({ activeStep, formData, handleInputChange, handleCheckboxChange, companiesData }) => {
+  const [roles, setRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+
   console.log('CompanyFormStep: Rendering with activeStep:', activeStep, 'formData:', formData);
   console.log('CompanyFormStep: handleInputChange:', handleInputChange, 'handleCheckboxChange:', handleCheckboxChange);
+
+  // Fetch roles on component mount
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        setRolesLoading(true);
+        const rolesData = await getRoles();
+        setRoles(rolesData);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      } finally {
+        setRolesLoading(false);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -297,21 +318,40 @@ const CompanyFormStep = ({ activeStep, formData, handleInputChange, handleCheckb
               },
             }}
           />
-          <TextField
+          <Select
             fullWidth
-            label="Role"
             value={formData.role || ''}
             onChange={handleInputChange('company', 'role')}
+            displayEmpty
             required
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 1,
-                '& fieldset': { borderColor: 'grey.300' },
-                '&:hover fieldset': { borderColor: 'grey.500' },
-                '&.Mui-focused fieldset': { borderColor: 'primary.main' },
-              },
+            disabled={rolesLoading}
+            renderValue={(selected) => {
+              if (!selected) return 'Select Role';
+              const role = roles.find(r => 
+                String(r.id) === String(selected) || String(r.name) === String(selected)
+              );
+              return role?.name || role || selected;
             }}
-          />
+            sx={{
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.300' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.500' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+            }}
+          >
+            <MenuItem value="" disabled>
+              Select Role
+            </MenuItem>
+            {roles.map((role) => (
+              <MenuItem key={role.id || role} value={role.name || role}>
+                {role.name || role}
+              </MenuItem>
+            ))}
+          </Select>
+          {rolesLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+              <CircularProgress size={20} />
+            </Box>
+          )}
         </>
       )}
     </Box>

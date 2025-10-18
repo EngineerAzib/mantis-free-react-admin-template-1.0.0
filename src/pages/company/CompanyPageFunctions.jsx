@@ -1,20 +1,34 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { GetCompany, GetStore, GetUsers, CompanyStoreUser } from '../../api/CompanyStoreUser';
+import { GetCompany, GetStore, GetUsers, CompanyStoreUser, AddUser, GetAuthorizedPersonInfo } from '../../api/CompanyStoreUser';
 import { Box, Typography } from '@mui/material';
 import { Mail, Phone, MapPin, Calendar } from 'lucide-react';
 
 // Fetch initial data
 export const initialCompaniesData = async (pageNumber = 1, pageSize = 10, searchText = '') => {
   try {
-    const filter =searchText;
+    console.log('🔍 Fetching companies with params:', { pageNumber, pageSize, searchText });
+    const filter = searchText;
     const response = await GetCompany(pageNumber, pageSize, filter);
-    console.log('Fetched companies:', response);
+    console.log('✅ Fetched companies response:', response);
+    console.log('📊 Companies data structure:', {
+      hasItems: !!response.items,
+      itemsLength: response.items?.length,
+      totalCount: response.totalCount,
+      responseKeys: Object.keys(response || {})
+    });
     return {
       items: Array.isArray(response.items) ? response.items : [],
       totalCount: response.totalCount || 0,
     };
   } catch (error) {
-    console.error('Error fetching companies:', error);
+    console.error('❌ Error fetching companies:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url
+    });
     return { items: [], totalCount: 0 };
   }
 };
@@ -48,6 +62,27 @@ export const initialUsersData = async (pageNumber = 1, pageSize = 10, searchText
   } catch (error) {
     console.error('Error fetching users:', error);
     return { items: [], totalCount: 0 };
+  }
+};
+
+// Fetch authorized person info
+export const initialAuthorizedPersonInfo = async () => {
+  try {
+    console.log('Fetching authorized person info...');
+    const response = await GetAuthorizedPersonInfo();
+    console.log('Authorized person info:', response);
+    return response;
+  } catch (error) {
+    console.error('Error fetching authorized person info:', error);
+    // Return default tabs if API fails
+    return {
+      role: 'Admin',
+      tabs: [
+        { tabName: 'Company' },
+        { tabName: 'Store' },
+        { tabName: 'User' }
+      ]
+    };
   }
 };
 
@@ -357,35 +392,78 @@ export const handleStoreSubmit = async (formData, companiesData, storesData, onS
   }
 };
 
-export const handleUserSubmit = (formData, companiesData, storesData, onSubmit, queryClient, setMessage, handleClose) => {
-  const { name, email, role, companyId, storeId, joinDate } = formData.user;
-  if (!name || !email || !role) {
-    setMessage({ open: true, message: 'Name, email, and role are required!', severity: 'error' });
+export const handleUserSubmit = async (formData, companiesData, storesData, onSubmit, queryClient, setMessage, handleClose) => {
+  const { username, email, fullName, address, cnic, phoneNumber, gender, role, companyId, storeId, password, confirmPassword, joinDate } = formData.user;
+  
+  // Validation
+  if (!username || !email || !fullName || !role || !password || !confirmPassword) {
+    setMessage({ open: true, message: 'Username, email, full name, role, and passwords are required!', severity: 'error' });
     return;
   }
-  const company = companiesData.find((c) => 
-    String(c.id) === String(companyId) || String(c.companyId) === String(companyId)
-  );
-  const store = storesData.find((s) => String(s.id) === String(storeId));
-  const newUser = {
-    id: storesData.length + 1,
-    name,
-    email,
-    role,
-    companyId: parseInt(companyId) || null,
-    companyName: company?.name || 'Unknown',
-    storeId: parseInt(storeId) || null,
-    storeName: store?.name || 'None',
-    joinDate: joinDate || new Date().toISOString().split('T')[0],
-    status: 'Active',
-  };
-  queryClient.setQueryData(['users', 1, 10, ''], (old = { items: [], totalCount: 0 }) => ({
-    items: [...old.items, newUser],
-    totalCount: old.totalCount + 1,
-  }));
-  onSubmit(formData.user);
-  setMessage({ open: true, message: 'User added successfully!', severity: 'success' });
-  handleClose('user');
+  
+  if (password !== confirmPassword) {
+    setMessage({ open: true, message: 'Passwords do not match!', severity: 'error' });
+    return;
+  }
+
+  try {
+    // Prepare user data for API
+    const userData = {
+      Username: username,
+      Email: email,
+      FullName: fullName,
+      Address: address || '',
+      CNIC: cnic || '',
+      PhoneNumber: phoneNumber || '',
+      Gender: gender || '',
+      CompanyId: companyId ? parseInt(companyId) : null,
+      StoreId: storeId ? parseInt(storeId) : null,
+      Password: password,
+      ConfirmPassword: confirmPassword,
+      Role: role
+    };
+
+    // Call the AddUser API
+    const response = await AddUser(userData);
+    console.log('User creation response:', response);
+    
+    // Update local cache with the new user
+    const company = companiesData.find((c) => 
+      String(c.id) === String(companyId) || String(c.companyId) === String(companyId)
+    );
+    const store = storesData.find((s) => String(s.id) === String(storeId));
+    
+    const newUser = {
+      id: Date.now(), // Temporary ID
+      username,
+      email,
+      fullName,
+      role,
+      companyId: parseInt(companyId) || null,
+      companyName: company?.name || 'Unknown',
+      storeId: parseInt(storeId) || null,
+      storeName: store?.name || 'None',
+      joinDate: joinDate || new Date().toISOString().split('T')[0],
+      status: 'Active',
+    };
+    
+    queryClient.setQueryData(['users', 1, 10, ''], (old = { items: [], totalCount: 0 }) => ({
+      items: [...old.items, newUser],
+      totalCount: old.totalCount + 1,
+    }));
+    
+    onSubmit(formData.user);
+    setMessage({ open: true, message: 'User added successfully!', severity: 'success' });
+    handleClose('user');
+    
+  } catch (error) {
+    console.error('User registration error:', error);
+    setMessage({ 
+      open: true, 
+      message: error.message || 'Failed to add user. Please try again.', 
+      severity: 'error' 
+    });
+  }
 };
 
 export const handleOpenModal = (setModalState) => (type) => {
