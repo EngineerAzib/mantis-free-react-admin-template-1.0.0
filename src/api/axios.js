@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://localhost:7252/api',
+  baseURL: 'https://posdemo.runasp.net/api',
   headers: {
     'Content-Type': 'application/json',
     Accept: '*/*',
