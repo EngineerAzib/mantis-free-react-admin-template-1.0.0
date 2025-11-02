@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { GetCategory,GetSearchAllProduct,AddBilling  } from '../../api/billing';
+import { handlerDrawerOpen } from '../../api/menu';
 
 
 export default function CompletePOSPage() {
@@ -142,6 +143,7 @@ export default function CompletePOSPage() {
     const onKey = (e) => {
       if (e.key === 'F3') {
         e.preventDefault();
+        handlerDrawerOpen(false);
         setSearchModalOpen(true);
       } else if (e.key === 'F4') {
         e.preventDefault();
@@ -306,7 +308,10 @@ export default function CompletePOSPage() {
             <button className="btn btn-outline-secondary" onClick={handleNewSale}>
               New sale
             </button>
-            <button className="btn btn-outline-secondary" onClick={() => setSearchModalOpen(true)}>
+            <button className="btn btn-outline-secondary" onClick={() => {
+              handlerDrawerOpen(false);
+              setSearchModalOpen(true);
+            }}>
               Categories / Search (F3)
             </button>
           </div>
@@ -331,7 +336,10 @@ export default function CompletePOSPage() {
               />
               <button
                 className="btn btn-primary"
-                onClick={() => setSearchModalOpen(true)}
+                onClick={() => {
+                  handlerDrawerOpen(false);
+                  setSearchModalOpen(true);
+                }}
                 disabled={loading}
               >
                 Search
@@ -524,7 +532,10 @@ export default function CompletePOSPage() {
               <div className="col-4">
                 <button
                   className="btn btn-outline-secondary w-100 h-100"
-                  onClick={() => setSearchModalOpen(true)}
+                  onClick={() => {
+                    handlerDrawerOpen(false);
+                    setSearchModalOpen(true);
+                  }}
                   disabled={loading}
                 >
                   <div className="small fw-medium">Search</div>
@@ -711,7 +722,8 @@ export default function CompletePOSPage() {
           tabIndex="-1" 
           style={{ 
             backgroundColor: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(2px)'
+            backdropFilter: 'blur(2px)',
+            zIndex: 1300
           }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -719,122 +731,77 @@ export default function CompletePOSPage() {
             }
           }}
         >
-          <div className="modal-dialog modal-dialog-centered modal-xl" style={{ maxWidth: '95%' }}>
-            <div className="modal-content" style={{ borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-              <div className="modal-header sticky-top" style={{ backgroundColor: '#fff', zIndex: 1050, borderRadius: '12px 12px 0 0', borderBottom: '2px solid #e9ecef' }}>
-                <div className="d-flex flex-column w-100">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.5rem' }}>Search Products</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setSearchModalOpen(false)}
-                      disabled={loading}
-                      style={{ fontSize: '1.2rem' }}
-                    ></button>
-                  </div>
-                  <p className="text-muted small mb-0">Select a category or search for products to add to cart</p>
-                  <input
-                    type="text"
-                    className="form-control mt-3"
-                    placeholder="Search products by name or ID..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    style={{ borderRadius: '8px' }}
-                  />
+          <div className="modal-dialog modal-dialog-centered modal-lg" style={{ maxWidth: '800px' }}>
+            <div className="modal-content" style={{ borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+              <div className="modal-header" style={{ backgroundColor: '#fff', borderRadius: '8px 8px 0 0', borderBottom: '1px solid #e9ecef' }}>
+                <div className="d-flex justify-content-between align-items-center w-100">
+                  <h5 className="modal-title fw-bold mb-0">Search Products</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setSearchModalOpen(false)}
+                    disabled={loading}
+                  ></button>
                 </div>
               </div>
-              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '1.5rem' }}>
+              <div className="modal-body p-3">
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by name or ID..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    autoFocus
+                  />
+                </div>
                 {loading ? (
-                  <div className="text-center text-muted p-5">
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <div className="mt-2">Loading products...</div>
+                  <div className="text-center text-muted p-4">
+                    <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <div className="mt-2 small">Loading...</div>
                   </div>
                 ) : (
-                  <div className="row g-3">
+                  <div className="row g-2">
                     <div className="col-3">
-                      <div className="card" style={{ borderRadius: '8px' }}>
-                        <div className="card-header bg-light" style={{ borderRadius: '8px 8px 0 0' }}>
-                          <h6 className="mb-0 fw-semibold">Categories</h6>
-                        </div>
-                        <div className="card-body p-2">
-                          <div className="d-flex flex-column gap-2">
-                            {CATEGORIES.map((c) => (
-                              <button
-                                key={c.id}
-                                onClick={() => setSelectedCategory(c.id)}
-                                className={`btn ${selectedCategory === c.id ? 'btn-primary' : 'btn-outline-secondary'} text-start w-100`}
-                                disabled={loading}
-                                style={{ borderRadius: '6px', transition: 'all 0.2s' }}
-                              >
-                                <div className="d-flex justify-content-between align-items-center">
-                                  <span>{c.name}</span>
-                                  {c.id !== 'all' && (
-                                    <span className="badge bg-secondary rounded-pill" style={{ fontSize: '0.7rem' }}>
-                                      {(c.items || []).length}
-                                    </span>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                      <div className="list-group" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        {CATEGORIES.map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => setSelectedCategory(c.id)}
+                            className={`list-group-item list-group-item-action ${selectedCategory === c.id ? 'active' : ''}`}
+                            disabled={loading}
+                          >
+                            {c.name}
+                            {c.id !== 'all' && (
+                              <span className="badge bg-secondary rounded-pill float-end">
+                                {(c.items || []).length}
+                              </span>
+                            )}
+                          </button>
+                        ))}
                       </div>
                     </div>
                     <div className="col-9">
-                      <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                      <div className="row g-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                         {(CATEGORIES.find((x) => x.id === selectedCategory)?.items || CATEGORIES[0]?.items || []).length === 0 ? (
-                          <div className="col-12">
-                            <div className="text-center text-muted p-5">
-                              <div className="mb-2" style={{ fontSize: '3rem' }}>🔍</div>
-                              <div>No products found in this category</div>
-                            </div>
+                          <div className="col-12 text-center text-muted p-4">
+                            <div>No products found</div>
                           </div>
                         ) : (
                           (CATEGORIES.find((x) => x.id === selectedCategory)?.items || CATEGORIES[0]?.items || []).map((p) => (
-                            <div key={p.id} className="col">
-                              <div className="card h-100 border shadow-sm" style={{ borderRadius: '10px', transition: 'all 0.2s', cursor: 'pointer' }} 
-                                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
-                                <div className="card-body d-flex flex-column">
-                                  <div className="mb-2">
-                                    <div className="fw-semibold fs-6" style={{ color: '#212529' }}>{p.name}</div>
-                                    <div className="text-muted small">ID: #{p.id}</div>
-                                  </div>
-                                  <div className="mt-auto">
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                      <div className="fw-bold fs-5 text-primary">${p.price.toFixed(2)}</div>
-                                    </div>
-                                    <div className="d-flex gap-2">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          addToCart(p);
-                                        }}
-                                        className="btn btn-primary btn-sm flex-grow-1"
-                                        disabled={loading}
-                                        style={{ borderRadius: '6px' }}
-                                      >
-                                        Add
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          addToCart(p);
-                                          setSearchModalOpen(false);
-                                        }}
-                                        className="btn btn-success btn-sm"
-                                        disabled={loading}
-                                        style={{ borderRadius: '6px' }}
-                                      >
-                                        ✓
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                            <div key={p.id} className="col-6 col-md-4">
+                              <button
+                                onClick={() => {
+                                  addToCart(p);
+                                  setSearchModalOpen(false);
+                                }}
+                                className="btn btn-outline-primary w-100 text-start p-2"
+                                disabled={loading}
+                              >
+                                <div className="fw-semibold small">{p.name}</div>
+                                <div className="text-muted" style={{ fontSize: '0.75rem' }}>#{p.id}</div>
+                                <div className="text-primary fw-bold mt-1">${p.price.toFixed(2)}</div>
+                              </button>
                             </div>
                           ))
                         )}
@@ -850,16 +817,17 @@ export default function CompletePOSPage() {
 
       {/* Payment Modal */}
       {paymentOpen && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)', zIndex: 1300 }}>
           <div
             className="modal-dialog modal-lg modal-dialog-centered"
             style={{
               maxHeight: '90vh',
               margin: '2rem auto',
+              zIndex: 1301
             }}
           >
-            <div className="modal-content" style={{ borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-              <div className="modal-header" style={{ backgroundColor: '#fff', zIndex: 1050, borderRadius: '12px 12px 0 0', borderBottom: '2px solid #e9ecef' }}>
+            <div className="modal-content" style={{ borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)', zIndex: 1301 }}>
+              <div className="modal-header" style={{ backgroundColor: '#fff', zIndex: 1302, borderRadius: '12px 12px 0 0', borderBottom: '2px solid #e9ecef', position: 'sticky', top: 0 }}>
                 <div className="d-flex flex-column w-100">
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.5rem' }}>Payment</h5>
