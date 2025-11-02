@@ -35,10 +35,14 @@ const ForgotPasswordModal = ({ open, handleClose }) => {
       <GenericFormModal
         open={open}
         handleClose={handleClose}
-        handleSubmit={() => mutation.mutate()}
+        handleSubmit={() => {
+          if (mutation.isPending) return;
+          mutation.mutate();
+        }}
         isStepValid={() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)} // Basic email validation
         title="Forgot Password"
         isMultiStep={false}
+        isSubmitting={mutation.isPending}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField

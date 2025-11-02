@@ -15,7 +15,8 @@ const GenericFormModal = ({
   isStepValid, 
   children, 
   title, 
-  isMultiStep = false 
+  isMultiStep = false,
+  isSubmitting = false 
 }) => {
   console.log('GenericFormModal: Rendering, open:', open, 'activeStep:', activeStep, 'children:', !!children);
 
@@ -240,7 +241,7 @@ const GenericFormModal = ({
         <Button
           onClick={isMultiStep && activeStep < steps.length - 1 ? handleNext : handleSubmit}
           variant="contained"
-          disabled={!isStepValid(isMultiStep ? activeStep : 0)}
+          disabled={!isStepValid(isMultiStep ? activeStep : 0) || isSubmitting}
           endIcon={
             isMultiStep && activeStep < steps.length - 1 ? (
               <ChevronRight size={16} />
@@ -262,7 +263,7 @@ const GenericFormModal = ({
             },
           }}
         >
-          {isMultiStep && activeStep < steps.length - 1 ? 'Continue' : 'Submit'}
+          {isMultiStep && activeStep < steps.length - 1 ? 'Continue' : isSubmitting ? 'Submitting...' : 'Submit'}
         </Button>
       </DialogActions>
     </Dialog>

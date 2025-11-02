@@ -132,6 +132,7 @@ const StaffPage = memo(
     };
 
     const handleSubmit = () => {
+      if (staffMutation.isPending) return; // Prevent multiple submissions
       console.log('Submitting payload:', formData);
       staffMutation.mutate();
     };
@@ -270,6 +271,7 @@ const StaffPage = memo(
           isStepValid={isStepValid}
           title="Create Staff"
           isMultiStep={false}
+          isSubmitting={staffMutation.isPending}
         >
           <StaffFormStep
             formData={formData}

@@ -129,6 +129,7 @@ const ExpensePage = memo(
     };
 
     const handleSubmit = () => {
+      if (expenseMutation.isPending) return; // Prevent multiple submissions
       console.log('Submitting payload:', formData);
       expenseMutation.mutate();
     };
@@ -263,6 +264,7 @@ const ExpensePage = memo(
           isStepValid={isStepValid}
           title="Create Expense"
           isMultiStep={false}
+          isSubmitting={expenseMutation.isPending}
         >
           <ExpenseFormStep
             formData={formData}

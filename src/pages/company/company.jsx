@@ -360,7 +360,10 @@ const CompanyPage = memo(
           handleClose={functions.handleClose(setModalState, setFormData, initialData)}
           handleNext={functions.handleNext(setModalState)}
           handleBack={functions.handleBack(setModalState)}
-          handleSubmit={() => companyMutation.mutate()}
+          handleSubmit={() => {
+            if (companyMutation.isPending) return;
+            companyMutation.mutate();
+          }}
           isStepValid={(step) => {
             console.log('CompanyPage: Validating company step', step, formData.company);
             switch (step) {
@@ -376,6 +379,7 @@ const CompanyPage = memo(
           }}
           title="Add Company"
           isMultiStep={true}
+          isSubmitting={companyMutation.isPending}
         >
           <CompanyFormStep
             activeStep={modalState.activeStep}
@@ -391,7 +395,10 @@ const CompanyPage = memo(
           formData={formData.store}
           handleInputChange={functions.handleInputChange(setFormData)}
           handleClose={functions.handleClose(setModalState, setFormData, initialData)}
-          handleSubmit={() => storeMutation.mutate()}
+          handleSubmit={() => {
+            if (storeMutation.isPending) return;
+            storeMutation.mutate();
+          }}
           isStepValid={() => {
             const storeNameValid = !!formData.store.StoreName;
             const companyIdValid = !!formData.store.companyId;
@@ -400,6 +407,7 @@ const CompanyPage = memo(
           }}
           title="Add Store"
           isMultiStep={false}
+          isSubmitting={storeMutation.isPending}
         >
       
           <StoreFormStep
@@ -415,7 +423,10 @@ const CompanyPage = memo(
           formData={formData.user}
           handleInputChange={functions.handleInputChange(setFormData)}
           handleClose={functions.handleClose(setModalState, setFormData, initialData)}
-          handleSubmit={() => userMutation.mutate()}
+          handleSubmit={() => {
+            if (userMutation.isPending) return;
+            userMutation.mutate();
+          }}
           isStepValid={() => {
             console.log('CompanyPage: Validating user', formData.user);
             return !!formData.user.username && 
@@ -428,6 +439,7 @@ const CompanyPage = memo(
           }}
           title="Add User"
           isMultiStep={false}
+          isSubmitting={userMutation.isPending}
         >
           <UserFormStep
             formData={formData.user}

@@ -186,6 +186,7 @@ const PurchaseProductPage = memo(
     };
 
     const handleSubmit = () => {
+      if (purchaseMutation.isPending) return; // Prevent multiple submissions
       console.log('Submitting payload:', formData);
       purchaseMutation.mutate();
     };
@@ -351,6 +352,7 @@ const PurchaseProductPage = memo(
           isStepValid={isStepValid}
           title="Create Purchase Product"
           isMultiStep={false}
+          isSubmitting={purchaseMutation.isPending}
         >
           <PurchaseProductFormStep
             formData={formData}

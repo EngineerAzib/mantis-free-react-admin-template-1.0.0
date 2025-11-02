@@ -75,6 +75,7 @@ const SupplierPage = memo(
     };
 
     const handleSubmit = () => {
+      if (supplierMutation.isPending) return; // Prevent multiple submissions
       console.log('Submitting payload:', formData);
       supplierMutation.mutate();
     };
@@ -200,6 +201,7 @@ const SupplierPage = memo(
           isStepValid={isStepValid}
           title="Create Supplier"
           isMultiStep={false}
+          isSubmitting={supplierMutation.isPending}
         >
           <SupplierFormStep
             formData={formData}

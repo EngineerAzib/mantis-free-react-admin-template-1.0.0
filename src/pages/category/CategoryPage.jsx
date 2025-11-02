@@ -178,6 +178,7 @@ const CategoryPage = memo(
     };
 
     const handleSubmit = () => {
+      if (addMutation.isPending || updateMutation.isPending) return; // Prevent multiple submissions
       console.log('CategoryPage: Submitting payload:', formData);
       if (isEditing) {
         updateMutation.mutate({ ...formData, CategoryId: editingId });
@@ -313,6 +314,7 @@ const CategoryPage = memo(
           isStepValid={isStepValid}
           title={isEditing ? 'Edit Category' : 'Create Category'}
           isMultiStep={false}
+          isSubmitting={addMutation.isPending || updateMutation.isPending}
         >
           <CategoryFormStep
             formData={formData}
