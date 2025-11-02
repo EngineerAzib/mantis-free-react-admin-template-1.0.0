@@ -168,7 +168,7 @@ export default function CompletePOSPage() {
     setCart((prev) => {
       const found = prev.find((c) => c.id === p.id);
       if (found) return prev.map((c) => (c.id === p.id ? { ...c, qty: c.qty + qty } : c));
-      return [...prev, { id: p.id, name: p.name, price: p.price, qty, categoryId: p.categoryId || 'all' }];
+      return [...prev, { id: p.id, name: p.name, price: p.price, originalPrice: p.price, qty, categoryId: p.categoryId || 'all' }];
     });
     setQuery('');
   }
@@ -182,7 +182,25 @@ export default function CompletePOSPage() {
   }
 
   function setItemPrice(id, price) {
-    setCart((prev) => prev.map((i) => (i.id === id ? { ...i, price: Math.max(0, +price) } : i)));
+    setCart((prev) => prev.map((i) => {
+      if (i.id === id) {
+        const newPrice = Math.max(0, +price);
+        // Get the original product price to compare
+        const prod = products.find((p) => p.id === id);
+        const originalProductPrice = prod ? prod.price : i.price;
+        
+        // If originalPrice is not set yet, set it to current price (before change)
+        // If new price equals original product price, clear the discount
+        if (!i.originalPrice) {
+          // First time changing price - save current price as original
+          return { ...i, price: newPrice, originalPrice: i.price !== newPrice ? i.price : undefined };
+        } else {
+          // Price was already changed - check if resetting to original product price
+          return { ...i, price: newPrice, originalPrice: newPrice === originalProductPrice ? undefined : i.originalPrice };
+        }
+      }
+      return i;
+    }));
   }
 
   function handleRemoveItem(id) {
@@ -348,64 +366,100 @@ export default function CompletePOSPage() {
                       <th className="w-50">Product name</th>
                       <th className="w-1/6">Qty</th>
                       <th className="w-1/6">Price</th>
+                      <th className="w-1/6">Discounted</th>
                       <th className="w-1/6 text-end">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan={4} className="text-center text-muted p-5">
+                        <td colSpan={5} className="text-center text-muted p-5">
                           Loading...
                         </td>
                       </tr>
                     ) : cart.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center text-muted p-5">
+                        <td colSpan={5} className="text-center text-muted p-5">
                           No items — add products from categories or search (F3)
                         </td>
                       </tr>
                     ) : (
-                      cart.map((i) => (
-                        <tr
-                          key={i.id}
-                          onClick={() => setSelectedId(i.id)}
-                          className={selectedId === i.id ? 'table-active' : ''}
-                        >
-                          <td className="p-3">{i.name}</td>
-                          <td className="p-3">
-                            <div className="d-flex align-items-center gap-2">
-                              <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => changeQty(i.id, -1)}
-                                disabled={loading}
-                              >
-                                -
-                              </button>
-                              <div className="text-center" style={{ width: '24px' }}>
-                                {i.qty}
+                      cart.map((i) => {
+                        const hasDiscount = i.originalPrice !== undefined && i.price !== i.originalPrice;
+                        const discountAmount = hasDiscount ? ((i.originalPrice - i.price) * i.qty).toFixed(2) : 0;
+                        const discountPercent = hasDiscount ? (((i.originalPrice - i.price) / i.originalPrice) * 100).toFixed(1) : 0;
+                        return (
+                          <tr
+                            key={i.id}
+                            onClick={() => setSelectedId(i.id)}
+                            className={selectedId === i.id ? 'table-active' : ''}
+                          >
+                            <td className="p-3">{i.name}</td>
+                            <td className="p-3">
+                              <div className="d-flex align-items-center gap-2">
+                                <button
+                                  className="btn btn-sm btn-outline-secondary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    changeQty(i.id, -1);
+                                  }}
+                                  disabled={loading}
+                                >
+                                  -
+                                </button>
+                                <div className="text-center" style={{ width: '24px' }}>
+                                  {i.qty}
+                                </div>
+                                <button
+                                  className="btn btn-sm btn-outline-secondary"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    changeQty(i.id, 1);
+                                  }}
+                                  disabled={loading}
+                                >
+                                  +
+                                </button>
                               </div>
+                            </td>
+                            <td className="p-3">
+                              <div>
+                                {hasDiscount && (
+                                  <div className="text-muted small text-decoration-line-through">
+                                    ${i.originalPrice.toFixed(2)}
+                                  </div>
+                                )}
+                                <div className={hasDiscount ? 'text-success fw-bold' : ''}>
+                                  ${i.price.toFixed(2)}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {hasDiscount ? (
+                                <div>
+                                  <div className="text-danger fw-semibold">-${discountAmount}</div>
+                                  <div className="text-muted small">({discountPercent}%)</div>
+                                </div>
+                              ) : (
+                                <div className="text-muted small">-</div>
+                              )}
+                            </td>
+                            <td className="p-3 text-end">
+                              <div>${(i.price * i.qty).toFixed(2)}</div>
                               <button
-                                className="btn btn-sm btn-outline-secondary"
-                                onClick={() => changeQty(i.id, 1)}
+                                className="btn btn-link text-danger ms-2 p-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveItem(i.id);
+                                }}
                                 disabled={loading}
                               >
-                                +
+                                Remove
                               </button>
-                            </div>
-                          </td>
-                          <td className="p-3">${i.price.toFixed(2)}</td>
-                          <td className="p-3 text-end">
-                            ${(i.price * i.qty).toFixed(2)}
-                            <button
-                              className="btn btn-link text-danger ms-2 p-0"
-                              onClick={() => handleRemoveItem(i.id)}
-                              disabled={loading}
-                            >
-                              Remove
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -448,8 +502,12 @@ export default function CompletePOSPage() {
                         className="btn btn-outline-secondary"
                         onClick={() => {
                           const prod = products.find((p) => p.id === selectedId);
-                          if (prod) {
-                            setItemPrice(selectedId, prod.price);
+                          const cartItem = cart.find((c) => c.id === selectedId);
+                          if (prod && cartItem) {
+                            // Reset to original product price
+                            setCart((prev) => prev.map((i) => 
+                              i.id === selectedId ? { ...i, price: prod.price, originalPrice: undefined } : i
+                            ));
                           }
                         }}
                         disabled={loading}
@@ -648,74 +706,138 @@ export default function CompletePOSPage() {
 
       {/* Search / Category Modal */}
       {searchModalOpen && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
-          <div className="modal-dialog modal-dialog-centered modal-xl">
-            <div className="modal-content">
-              <div className="modal-header sticky-top" style={{ backgroundColor: '#fff', zIndex: 1050 }}>
-                <h5 className="modal-title">Categories</h5>
-                <p className="text-muted small mb-0">Select a category to view its products</p>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setSearchModalOpen(false)}
-                  disabled={loading}
-                ></button>
+        <div 
+          className="modal show d-block" 
+          tabIndex="-1" 
+          style={{ 
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(2px)'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSearchModalOpen(false);
+            }
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered modal-xl" style={{ maxWidth: '95%' }}>
+            <div className="modal-content" style={{ borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+              <div className="modal-header sticky-top" style={{ backgroundColor: '#fff', zIndex: 1050, borderRadius: '12px 12px 0 0', borderBottom: '2px solid #e9ecef' }}>
+                <div className="d-flex flex-column w-100">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.5rem' }}>Search Products</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setSearchModalOpen(false)}
+                      disabled={loading}
+                      style={{ fontSize: '1.2rem' }}
+                    ></button>
+                  </div>
+                  <p className="text-muted small mb-0">Select a category or search for products to add to cart</p>
+                  <input
+                    type="text"
+                    className="form-control mt-3"
+                    placeholder="Search products by name or ID..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    style={{ borderRadius: '8px' }}
+                  />
+                </div>
               </div>
-              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', padding: '1.5rem' }}>
                 {loading ? (
-                  <div className="text-center text-muted p-5">Loading...</div>
+                  <div className="text-center text-muted p-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <div className="mt-2">Loading products...</div>
+                  </div>
                 ) : (
-                  <div className="row">
+                  <div className="row g-3">
                     <div className="col-3">
-                      <div className="d-flex flex-column gap-2">
-                        {CATEGORIES.map((c) => (
-                          <button
-                            key={c.id}
-                            onClick={() => setSelectedCategory(c.id)}
-                            className={`btn ${selectedCategory === c.id ? 'btn-primary' : 'btn-outline-secondary'} text-start`}
-                            disabled={loading}
-                          >
-                            {c.name}
-                          </button>
-                        ))}
+                      <div className="card" style={{ borderRadius: '8px' }}>
+                        <div className="card-header bg-light" style={{ borderRadius: '8px 8px 0 0' }}>
+                          <h6 className="mb-0 fw-semibold">Categories</h6>
+                        </div>
+                        <div className="card-body p-2">
+                          <div className="d-flex flex-column gap-2">
+                            {CATEGORIES.map((c) => (
+                              <button
+                                key={c.id}
+                                onClick={() => setSelectedCategory(c.id)}
+                                className={`btn ${selectedCategory === c.id ? 'btn-primary' : 'btn-outline-secondary'} text-start w-100`}
+                                disabled={loading}
+                                style={{ borderRadius: '6px', transition: 'all 0.2s' }}
+                              >
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <span>{c.name}</span>
+                                  {c.id !== 'all' && (
+                                    <span className="badge bg-secondary rounded-pill" style={{ fontSize: '0.7rem' }}>
+                                      {(c.items || []).length}
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="col-9" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-                      <div className="row row-cols-2 row-cols-md-3 g-3">
-                        {(CATEGORIES.find((x) => x.id === selectedCategory)?.items || CATEGORIES[0].items).map((p) => (
-                          <div key={p.id} className="col">
-                            <div className="card h-100">
-                              <div className="card-body">
-                                <div className="card-title fw-medium">{p.name}</div>
-                                <div className="text-muted small">#{p.id}</div>
-                                <div className="d-flex justify-content-between align-items-center mt-3">
-                                  <div className="fw-semibold">${p.price.toFixed(2)}</div>
-                                  <div className="d-flex gap-2">
-                                    <button
-                                      onClick={() => {
-                                        addToCart(p);
-                                      }}
-                                      className="btn btn-primary btn-sm"
-                                      disabled={loading}
-                                    >
-                                      Add
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        addToCart(p);
-                                        setSearchModalOpen(false);
-                                      }}
-                                      className="btn btn-outline-secondary btn-sm"
-                                      disabled={loading}
-                                    >
-                                      Add & Close
-                                    </button>
+                    <div className="col-9">
+                      <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                        {(CATEGORIES.find((x) => x.id === selectedCategory)?.items || CATEGORIES[0]?.items || []).length === 0 ? (
+                          <div className="col-12">
+                            <div className="text-center text-muted p-5">
+                              <div className="mb-2" style={{ fontSize: '3rem' }}>🔍</div>
+                              <div>No products found in this category</div>
+                            </div>
+                          </div>
+                        ) : (
+                          (CATEGORIES.find((x) => x.id === selectedCategory)?.items || CATEGORIES[0]?.items || []).map((p) => (
+                            <div key={p.id} className="col">
+                              <div className="card h-100 border shadow-sm" style={{ borderRadius: '10px', transition: 'all 0.2s', cursor: 'pointer' }} 
+                                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                                <div className="card-body d-flex flex-column">
+                                  <div className="mb-2">
+                                    <div className="fw-semibold fs-6" style={{ color: '#212529' }}>{p.name}</div>
+                                    <div className="text-muted small">ID: #{p.id}</div>
+                                  </div>
+                                  <div className="mt-auto">
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                      <div className="fw-bold fs-5 text-primary">${p.price.toFixed(2)}</div>
+                                    </div>
+                                    <div className="d-flex gap-2">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addToCart(p);
+                                        }}
+                                        className="btn btn-primary btn-sm flex-grow-1"
+                                        disabled={loading}
+                                        style={{ borderRadius: '6px' }}
+                                      >
+                                        Add
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addToCart(p);
+                                          setSearchModalOpen(false);
+                                        }}
+                                        className="btn btn-success btn-sm"
+                                        disabled={loading}
+                                        style={{ borderRadius: '6px' }}
+                                      >
+                                        ✓
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
@@ -728,50 +850,53 @@ export default function CompletePOSPage() {
 
       {/* Payment Modal */}
       {paymentOpen && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
           <div
-            className="modal-dialog modal-lg"
+            className="modal-dialog modal-lg modal-dialog-centered"
             style={{
-              marginTop: '0',
-              transform: 'translateY(0)',
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              right: '0',
-              margin: 'auto',
               maxHeight: '90vh',
-              overflowY: 'auto',
+              margin: '2rem auto',
             }}
           >
-            <div className="modal-content">
-              <div className="modal-header sticky-top" style={{ backgroundColor: '#fff', zIndex: 1050 }}>
-                <h5 className="modal-title">Payment</h5>
-                <p className="text-muted small mb-0">Confirm payment and print receipt</p>
-                <div className="btn-group">
-                  <button
-                    className={`btn btn-sm ${paymentMethod === 'cash' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => setPaymentMethod('cash')}
-                    disabled={loading}
-                  >
-                    Cash
-                  </button>
-                  <button
-                    className={`btn btn-sm ${paymentMethod === 'bank' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => setPaymentMethod('bank')}
-                    disabled={loading}
-                  >
-                    Bank
-                  </button>
-                  <button
-                    className={`btn btn-sm ${paymentMethod === 'check' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                    onClick={() => setPaymentMethod('check')}
-                    disabled={loading}
-                  >
-                    Check
-                  </button>
+            <div className="modal-content" style={{ borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+              <div className="modal-header" style={{ backgroundColor: '#fff', zIndex: 1050, borderRadius: '12px 12px 0 0', borderBottom: '2px solid #e9ecef' }}>
+                <div className="d-flex flex-column w-100">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.5rem' }}>Payment</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setPaymentOpen(false)}
+                      disabled={loading}
+                    ></button>
+                  </div>
+                  <p className="text-muted small mb-2">Confirm payment and print receipt</p>
+                  <div className="btn-group w-100" role="group">
+                    <button
+                      className={`btn btn-sm ${paymentMethod === 'cash' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => setPaymentMethod('cash')}
+                      disabled={loading}
+                    >
+                      Cash
+                    </button>
+                    <button
+                      className={`btn btn-sm ${paymentMethod === 'bank' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => setPaymentMethod('bank')}
+                      disabled={loading}
+                    >
+                      Bank
+                    </button>
+                    <button
+                      className={`btn btn-sm ${paymentMethod === 'check' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      onClick={() => setPaymentMethod('check')}
+                      disabled={loading}
+                    >
+                      Check
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className="modal-body" style={{ maxHeight: 'calc(90vh - 100px)', overflowY: 'auto' }}>
+              <div className="modal-body" style={{ maxHeight: 'calc(90vh - 200px)', overflowY: 'auto', padding: '1.5rem' }}>
                 {billingSuccess ? (
                   <>
                     <div className="text-center mb-3">
