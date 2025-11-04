@@ -9,12 +9,13 @@ export const loginUser = async (email, password) => {
     console.log('Login response:', response.data);
     // Transform response to match expected { token, user } format
     const transformedResponse = {
-      token: response.data.token.result, // Extract JWT from token.result
-      user: {
-        id: response.data.userId,
-        email, // Use the input email since backend doesn't return it
-      },
-    };
+  token: response.data.data.token, // ✅ correct path
+  user: {
+    id: response.data.data.userId,
+    email,
+  },
+};
+
     console.log('Transformed response:', transformedResponse);
     return transformedResponse;
   } catch (error) {
