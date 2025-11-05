@@ -108,14 +108,14 @@ export default function CompletePOSPage() {
     if (!q) return [];
     console.log('products', products);
     return products
-      .filter(p => p.name.toLowerCase().includes(q) || p.id.includes(q))
+      .filter(p => p.name.toLowerCase().includes(q) || String(p.id).includes(q))
       .slice(0, 8);
   }, [query, products]);
 
   // Cart calculations
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax = +(subtotal * 0.07).toFixed(2);
-  const total = +(subtotal + tax).toFixed(2);
+  const tax = 0;
+  const total = +subtotal.toFixed(2);
 
   const discountedTotal = useMemo(() => {
     if (discountType === 'percent') {
@@ -286,7 +286,7 @@ export default function CompletePOSPage() {
         <p>Date: ${new Date().toLocaleString()}</p>
         <div class="receipt-items">${itemsHtml}</div>
         <p>Subtotal: $${subtotal.toFixed(2)}</p>
-        <p>Tax (7%): $${tax.toFixed(2)}</p>
+        
         <p>Discount: ${discountType === 'percent' ? `${discountValue}%` : `$${discountValue}`}</p>
         <p><strong>Total: $${total.toFixed(2)}</strong></p>
       </div>`;
@@ -296,24 +296,26 @@ export default function CompletePOSPage() {
     <div className="container-fluid bg-light min-vh-100 p-4">
       {/* Header - Hidden when payment modal is open */}
       {!paymentOpen && (
-        <header className="mb-4 d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center gap-3">
-            {/* <div className="rounded bg-gradient" style={{ width: '40px', height: '40px', background: 'linear-gradient(to bottom right, #7c3aed, #38bdf8)' }} />
-            <div>
-              <div className="fw-bold fs-5">SwiftPOS</div>
-              <div className="text-muted small">Fast modern checkout</div>
-            </div> */}
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <button className="btn btn-outline-secondary" onClick={handleNewSale}>
-              New sale
-            </button>
-            <button className="btn btn-outline-secondary" onClick={() => {
-              handlerDrawerOpen(false);
-              setSearchModalOpen(true);
-            }}>
-              Categories / Search (F3)
-            </button>
+        <header className="mb-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-3">
+              <div className="rounded" style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #2563eb, #22c55e)' }} />
+              <div>
+                <div className="fw-semibold" style={{ fontSize: '1.125rem' }}>POS</div>
+                <div className="text-muted" style={{ fontSize: '.825rem' }}>Fast, modern checkout</div>
+              </div>
+            </div>
+            <div className="d-flex align-items-center gap-2">
+              <button className="btn btn-outline-secondary" onClick={handleNewSale}>
+                New sale
+              </button>
+              <button className="btn btn-primary" onClick={() => {
+                handlerDrawerOpen(false);
+                setSearchModalOpen(true);
+              }}>
+                Search (F3)
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -321,8 +323,8 @@ export default function CompletePOSPage() {
       <div className="row g-4 h-100">
         {/* Left area (search + cart) */}
         <div className="col-lg-8 h-100 d-flex flex-column">
-          <div className="card flex-grow-1 d-flex flex-column">
-            <div className="card-header d-flex align-items-center gap-3">
+          <div className="card flex-grow-1 d-flex flex-column border-0 shadow-sm">
+            <div className="card-header bg-white d-flex align-items-center gap-2" style={{ borderBottom: '1px solid #eef2f7' }}>
               <input
                 ref={searchRef}
                 value={query}
@@ -367,15 +369,15 @@ export default function CompletePOSPage() {
             )}
 
             <div className="flex-grow-1 overflow-auto">
-              <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-                <table className="table table-hover">
+              <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 320px)' }}>
+                <table className="table align-middle">
                   <thead className="table-light sticky-top" style={{ top: 0, backgroundColor: '#fff', zIndex: 1 }}>
                     <tr>
-                      <th className="w-50">Product name</th>
-                      <th className="w-1/6">Qty</th>
-                      <th className="w-1/6">Price</th>
-                      <th className="w-1/6">Discounted</th>
-                      <th className="w-1/6 text-end">Amount</th>
+                      <th style={{ width: '45%' }}>Product</th>
+                      <th style={{ width: '15%' }}>Qty</th>
+                      <th style={{ width: '15%' }}>Price</th>
+                      <th style={{ width: '15%' }}>Discount</th>
+                      <th className="text-end" style={{ width: '10%' }}>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -402,7 +404,10 @@ export default function CompletePOSPage() {
                             onClick={() => setSelectedId(i.id)}
                             className={selectedId === i.id ? 'table-active' : ''}
                           >
-                            <td className="p-3">{i.name}</td>
+                            <td className="p-3">
+                              <div className="fw-semibold">{i.name}</div>
+                              <div className="text-muted small">#{i.id}</div>
+                            </td>
                             <td className="p-3">
                               <div className="d-flex align-items-center gap-2">
                                 <button
@@ -415,7 +420,7 @@ export default function CompletePOSPage() {
                                 >
                                   -
                                 </button>
-                                <div className="text-center" style={{ width: '24px' }}>
+                                <div className="text-center fw-semibold" style={{ width: '28px' }}>
                                   {i.qty}
                                 </div>
                                 <button
@@ -437,7 +442,7 @@ export default function CompletePOSPage() {
                                     ${i.originalPrice.toFixed(2)}
                                   </div>
                                 )}
-                                <div className={hasDiscount ? 'text-success fw-bold' : ''}>
+                                <div className={hasDiscount ? 'text-success fw-bold' : 'fw-semibold'}>
                                   ${i.price.toFixed(2)}
                                 </div>
                               </div>
@@ -449,11 +454,11 @@ export default function CompletePOSPage() {
                                   <div className="text-muted small">({discountPercent}%)</div>
                                 </div>
                               ) : (
-                                <div className="text-muted small">-</div>
+                                <div className="text-muted small">—</div>
                               )}
                             </td>
                             <td className="p-3 text-end">
-                              <div>${(i.price * i.qty).toFixed(2)}</div>
+                              <div className="fw-semibold">${(i.price * i.qty).toFixed(2)}</div>
                               <button
                                 className="btn btn-link text-danger ms-2 p-0"
                                 onClick={(e) => {
@@ -474,10 +479,11 @@ export default function CompletePOSPage() {
               </div>
             </div>
 
-            <div className="card-footer text-end">
-              <div className="text-muted small">Subtotal ${subtotal.toFixed(2)}</div>
-              <div className="text-muted small">Tax ${tax.toFixed(2)}</div>
-              <div className="fs-3 fw-bold">Total ${total.toFixed(2)}</div>
+            <div className="card-footer bg-white" style={{ borderTop: '1px solid #eef2f7' }}>
+              <div className="d-flex justify-content-end align-items-end flex-column">
+                <div className="text-muted" style={{ fontSize: '.9rem' }}>Subtotal ${subtotal.toFixed(2)}</div>
+                <div className="fw-bold" style={{ fontSize: '1.5rem' }}>Total ${total.toFixed(2)}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -883,10 +889,7 @@ export default function CompletePOSPage() {
                         <div className="col-6 text-muted">Subtotal</div>
                         <div className="col-6 text-end">${subtotal.toFixed(2)}</div>
                       </div>
-                      <div className="row mb-1">
-                        <div className="col-6 text-muted">Tax (7%)</div>
-                        <div className="col-6 text-end">${tax.toFixed(2)}</div>
-                      </div>
+                      
                       <div className="row mb-1">
                         <div className="col-6 text-muted">Discount</div>
                         <div className="col-6 text-end">
@@ -905,10 +908,7 @@ export default function CompletePOSPage() {
                       <div className="col-6 text-muted">Subtotal</div>
                       <div className="col-6 text-end">${subtotal.toFixed(2)}</div>
                     </div>
-                    <div className="row mb-3">
-                      <div className="col-6 text-muted">Tax</div>
-                      <div className="col-6 text-end">${tax.toFixed(2)}</div>
-                    </div>
+                    
                     <div className="row mb-3 align-items-center">
                       <div className="col-3">
                         <label className="form-label mb-0">Discount</label>
