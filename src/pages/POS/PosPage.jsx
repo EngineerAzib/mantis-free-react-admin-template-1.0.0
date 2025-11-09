@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GetCategory,GetSearchAllProduct,AddBilling  } from '../../api/billing';
 import { handlerDrawerOpen } from '../../api/menu';
+import { LayoutDashboard, Search, ShoppingCart, X } from 'lucide-react';
 
 
 export default function CompletePOSPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cart, setCart] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -293,38 +296,186 @@ export default function CompletePOSPage() {
   }
 
   return (
-    <div className="container-fluid bg-light min-vh-100 p-4">
-      {/* Header - Hidden when payment modal is open */}
+    <div style={{ 
+      width: '100vw', 
+      height: '100vh', 
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#f8f9fa'
+    }}>
+      {/* Modern Header - Hidden when payment modal is open */}
       {!paymentOpen && (
-        <header className="mb-3">
-          <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-3">
-              <div className="rounded" style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #2563eb, #22c55e)' }} />
+        <header style={{
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          zIndex: 100
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button
+              onClick={() => navigate('/dashboard/default')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                color: '#374151',
+                fontWeight: 500,
+                fontSize: '0.875rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#e5e7eb';
+                e.currentTarget.style.borderColor = '#d1d5db';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+              }}
+            >
+              <LayoutDashboard size={18} />
+              Dashboard
+            </button>
+            <div style={{ 
+              width: '2px', 
+              height: '24px', 
+              backgroundColor: '#e5e7eb',
+              margin: '0 0.5rem'
+            }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 6px rgba(102, 126, 234, 0.3)'
+              }}>
+                <ShoppingCart size={20} color="#ffffff" />
+              </div>
               <div>
-                <div className="fw-semibold" style={{ fontSize: '1.125rem' }}>POS</div>
-                <div className="text-muted" style={{ fontSize: '.825rem' }}>Fast, modern checkout</div>
+                <div style={{ 
+                  fontSize: '1.25rem', 
+                  fontWeight: 700,
+                  color: '#111827',
+                  lineHeight: 1.2
+                }}>
+                  Point of Sale
+                </div>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#6b7280',
+                  marginTop: '2px'
+                }}>
+                  Professional checkout system
+                </div>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2">
-              <button className="btn btn-outline-secondary" onClick={handleNewSale}>
-                New sale
-              </button>
-              <button className="btn btn-primary" onClick={() => {
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={handleNewSale}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#ffffff',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                color: '#374151',
+                fontWeight: 500,
+                fontSize: '0.875rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+                e.currentTarget.style.borderColor = '#9ca3af';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#d1d5db';
+              }}
+            >
+              New Sale
+            </button>
+            <button
+              onClick={() => {
                 handlerDrawerOpen(false);
                 setSearchModalOpen(true);
-              }}>
-                Search (F3)
-              </button>
-            </div>
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#667eea',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                color: '#ffffff',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 4px rgba(102, 126, 234, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#5568d3';
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#667eea';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.3)';
+              }}
+            >
+              <Search size={16} />
+              Search (F3)
+            </button>
           </div>
         </header>
       )}
 
-      <div className="row g-4 h-100">
+      <div style={{ 
+        flex: 1, 
+        display: 'flex', 
+        gap: '1rem', 
+        padding: '1rem',
+        overflow: 'hidden',
+        height: 'calc(100vh - 80px)'
+      }}>
         {/* Left area (search + cart) */}
-        <div className="col-lg-8 h-100 d-flex flex-column">
-          <div className="card flex-grow-1 d-flex flex-column border-0 shadow-sm">
-            <div className="card-header bg-white d-flex align-items-center gap-2" style={{ borderBottom: '1px solid #eef2f7' }}>
+        <div style={{ 
+          flex: '1 1 65%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          minWidth: 0
+        }}>
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '1rem 1.25rem',
+              backgroundColor: '#ffffff',
+              borderBottom: '1px solid #e5e7eb',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
               <input
                 ref={searchRef}
                 value={query}
@@ -332,18 +483,56 @@ export default function CompletePOSPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && filtered[0]) addToCart(filtered[0]);
                 }}
-                placeholder="Search product by name or code"
-                className="form-control"
+                placeholder="Search product by name or code..."
                 disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '0.625rem 1rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  outline: 'none',
+                  transition: 'all 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#667eea';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               />
               <button
-                className="btn btn-primary"
                 onClick={() => {
                   handlerDrawerOpen(false);
                   setSearchModalOpen(true);
                 }}
                 disabled={loading}
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  backgroundColor: '#667eea',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = '#5568d3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#667eea';
+                }}
               >
+                <Search size={16} />
                 Search
               </button>
             </div>
@@ -368,28 +557,78 @@ export default function CompletePOSPage() {
               </div>
             )}
 
-            <div className="flex-grow-1 overflow-auto">
-              <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 320px)' }}>
-                <table className="table align-middle">
-                  <thead className="table-light sticky-top" style={{ top: 0, backgroundColor: '#fff', zIndex: 1 }}>
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <div style={{ maxHeight: 'calc(100vh - 400px)', overflowY: 'auto' }}>
+                <table style={{ 
+                  width: '100%', 
+                  borderCollapse: 'collapse',
+                  fontSize: '0.875rem'
+                }}>
+                  <thead style={{ 
+                    position: 'sticky', 
+                    top: 0, 
+                    backgroundColor: '#f9fafb', 
+                    zIndex: 10,
+                    borderBottom: '2px solid #e5e7eb'
+                  }}>
                     <tr>
-                      <th style={{ width: '45%' }}>Product</th>
-                      <th style={{ width: '15%' }}>Qty</th>
-                      <th style={{ width: '15%' }}>Price</th>
-                      <th style={{ width: '15%' }}>Discount</th>
-                      <th className="text-end" style={{ width: '10%' }}>Amount</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left',
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '45%'
+                      }}>Product</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left',
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '15%'
+                      }}>Qty</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left',
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '15%'
+                      }}>Price</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left',
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '15%'
+                      }}>Discount</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'right',
+                        fontWeight: 600,
+                        color: '#374151',
+                        width: '10%'
+                      }}>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan={5} className="text-center text-muted p-5">
+                        <td colSpan={5} style={{ 
+                          textAlign: 'center', 
+                          color: '#6b7280', 
+                          padding: '3rem',
+                          fontSize: '0.875rem'
+                        }}>
                           Loading...
                         </td>
                       </tr>
                     ) : cart.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center text-muted p-5">
+                        <td colSpan={5} style={{ 
+                          textAlign: 'center', 
+                          color: '#6b7280', 
+                          padding: '3rem',
+                          fontSize: '0.875rem'
+                        }}>
                           No items — add products from categories or search (F3)
                         </td>
                       </tr>
@@ -398,74 +637,170 @@ export default function CompletePOSPage() {
                         const hasDiscount = i.originalPrice !== undefined && i.price !== i.originalPrice;
                         const discountAmount = hasDiscount ? ((i.originalPrice - i.price) * i.qty).toFixed(2) : 0;
                         const discountPercent = hasDiscount ? (((i.originalPrice - i.price) / i.originalPrice) * 100).toFixed(1) : 0;
+                        const isSelected = selectedId === i.id;
                         return (
                           <tr
                             key={i.id}
                             onClick={() => setSelectedId(i.id)}
-                            className={selectedId === i.id ? 'table-active' : ''}
+                            style={{
+                              backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.15s',
+                              borderBottom: '1px solid #e5e7eb'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.backgroundColor = '#f9fafb';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }
+                            }}
                           >
-                            <td className="p-3">
-                              <div className="fw-semibold">{i.name}</div>
-                              <div className="text-muted small">#{i.id}</div>
+                            <td style={{ padding: '0.75rem 1rem' }}>
+                              <div style={{ fontWeight: 600, color: '#111827' }}>{i.name}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>#{i.id}</div>
                             </td>
-                            <td className="p-3">
-                              <div className="d-flex align-items-center gap-2">
+                            <td style={{ padding: '0.75rem 1rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <button
-                                  className="btn btn-sm btn-outline-secondary"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     changeQty(i.id, -1);
                                   }}
                                   disabled={loading}
+                                  style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '6px',
+                                    backgroundColor: '#ffffff',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    color: '#374151',
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!loading) {
+                                      e.currentTarget.style.borderColor = '#9ca3af';
+                                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = '#d1d5db';
+                                    e.currentTarget.style.backgroundColor = '#ffffff';
+                                  }}
                                 >
                                   -
                                 </button>
-                                <div className="text-center fw-semibold" style={{ width: '28px' }}>
+                                <div style={{ 
+                                  textAlign: 'center', 
+                                  fontWeight: 600,
+                                  width: '32px',
+                                  color: '#111827'
+                                }}>
                                   {i.qty}
                                 </div>
                                 <button
-                                  className="btn btn-sm btn-outline-secondary"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     changeQty(i.id, 1);
                                   }}
                                   disabled={loading}
+                                  style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '6px',
+                                    backgroundColor: '#ffffff',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    color: '#374151',
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!loading) {
+                                      e.currentTarget.style.borderColor = '#9ca3af';
+                                      e.currentTarget.style.backgroundColor = '#f9fafb';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = '#d1d5db';
+                                    e.currentTarget.style.backgroundColor = '#ffffff';
+                                  }}
                                 >
                                   +
                                 </button>
                               </div>
                             </td>
-                            <td className="p-3">
+                            <td style={{ padding: '0.75rem 1rem' }}>
                               <div>
                                 {hasDiscount && (
-                                  <div className="text-muted small text-decoration-line-through">
+                                  <div style={{ 
+                                    fontSize: '0.75rem', 
+                                    color: '#9ca3af',
+                                    textDecoration: 'line-through'
+                                  }}>
                                     ${i.originalPrice.toFixed(2)}
                                   </div>
                                 )}
-                                <div className={hasDiscount ? 'text-success fw-bold' : 'fw-semibold'}>
+                                <div style={{ 
+                                  fontWeight: hasDiscount ? 700 : 600,
+                                  color: hasDiscount ? '#10b981' : '#111827'
+                                }}>
                                   ${i.price.toFixed(2)}
                                 </div>
                               </div>
                             </td>
-                            <td className="p-3">
+                            <td style={{ padding: '0.75rem 1rem' }}>
                               {hasDiscount ? (
                                 <div>
-                                  <div className="text-danger fw-semibold">-${discountAmount}</div>
-                                  <div className="text-muted small">({discountPercent}%)</div>
+                                  <div style={{ fontWeight: 600, color: '#ef4444' }}>-${discountAmount}</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>({discountPercent}%)</div>
                                 </div>
                               ) : (
-                                <div className="text-muted small">—</div>
+                                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>—</div>
                               )}
                             </td>
-                            <td className="p-3 text-end">
-                              <div className="fw-semibold">${(i.price * i.qty).toFixed(2)}</div>
+                            <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                              <div style={{ fontWeight: 600, color: '#111827', marginBottom: '4px' }}>
+                                ${(i.price * i.qty).toFixed(2)}
+                              </div>
                               <button
-                                className="btn btn-link text-danger ms-2 p-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRemoveItem(i.id);
                                 }}
                                 disabled={loading}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#ef4444',
+                                  cursor: 'pointer',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 500,
+                                  padding: 0,
+                                  textDecoration: 'underline',
+                                  transition: 'color 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!loading) {
+                                    e.currentTarget.style.color = '#dc2626';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = '#ef4444';
+                                }}
                               >
                                 Remove
                               </button>
@@ -479,17 +814,41 @@ export default function CompletePOSPage() {
               </div>
             </div>
 
-            <div className="card-footer bg-white" style={{ borderTop: '1px solid #eef2f7' }}>
-              <div className="d-flex justify-content-end align-items-end flex-column">
-                <div className="text-muted" style={{ fontSize: '.9rem' }}>Subtotal ${subtotal.toFixed(2)}</div>
-                <div className="fw-bold" style={{ fontSize: '1.5rem' }}>Total ${total.toFixed(2)}</div>
+            <div style={{
+              padding: '1.25rem',
+              backgroundColor: '#ffffff',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'flex-end',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              <div style={{ 
+                fontSize: '0.875rem', 
+                color: '#6b7280',
+                fontWeight: 500
+              }}>
+                Subtotal ${subtotal.toFixed(2)}
+              </div>
+              <div style={{ 
+                fontSize: '1.75rem', 
+                fontWeight: 700,
+                color: '#111827'
+              }}>
+                Total ${total.toFixed(2)}
               </div>
             </div>
           </div>
         </div>
 
         {/* Right area (action pad + selected item edit) */}
-        <div className="col-lg-4">
+        <div style={{ 
+          flex: '0 0 380px', 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
           <div className="d-grid gap-3">
             {selectedId && (
               <div className="card">

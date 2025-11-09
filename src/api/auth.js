@@ -78,6 +78,7 @@ export const registerUser = async (userData) => {
 
 // Get roles API
 export const getRoles = async () => {
+  debugger;
   try {
     const response = await axios.get('/Auth/roles');
     console.log('Roles response:', response.data);

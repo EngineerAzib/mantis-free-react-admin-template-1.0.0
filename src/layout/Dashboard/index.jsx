@@ -18,13 +18,31 @@ export default function DashboardLayout() {
   const { pathname } = useLocation();
   const { menuMasterLoading } = useGetMenuMaster();
   const downXL = useMediaQuery((theme) => theme.breakpoints.down('xl'));
+  const isPOSPage = pathname === '/pos';
 
   useEffect(() => {
-    handlerDrawerOpen(!downXL);
-  }, [downXL]);
+    if (!isPOSPage) {
+      handlerDrawerOpen(!downXL);
+    } else {
+      // Hide drawer when on POS page
+      handlerDrawerOpen(false);
+    }
+  }, [downXL, isPOSPage]);
 
   if (menuMasterLoading) return <Loader />;
 
+  // Full screen layout for POS page
+  if (isPOSPage) {
+    return (
+      <Box sx={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden' }}>
+        <Box component="main" sx={{ width: '100%', height: '100vh', p: 0, m: 0 }}>
+          <Outlet />
+        </Box>
+      </Box>
+    );
+  }
+
+  // Normal layout for other pages
   return (
     <Box sx={{ display: 'flex', width: '100%' }}>
       <Header />
@@ -41,7 +59,7 @@ export default function DashboardLayout() {
             flexDirection: 'column'
           }}
         >
-          {pathname !== '/apps/profiles/account/my-account' && pathname !== '/pos' && <Breadcrumbs />}
+          {pathname !== '/apps/profiles/account/my-account' && <Breadcrumbs />}
           <Outlet />
           <Footer />
         </Box>
