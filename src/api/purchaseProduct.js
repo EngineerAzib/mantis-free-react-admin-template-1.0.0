@@ -22,7 +22,7 @@ export const getStoresByCompany = async (companyId) => {
 
 export const GetPurchaseProduct = async (pageNumber = 1, pageSize = 10, filter = null) => {
   try {
-    const response = await axiosInstance.get('/PurchaseProduct/GetPurchaseProduct', {
+    const response = await axiosInstance.get('/PurchaseOrder/GetPurchaseOrder', {
       params: {
         pageNumber,
         pageSize,
