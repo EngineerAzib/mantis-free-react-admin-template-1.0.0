@@ -28,8 +28,6 @@ const ProductPage = memo(
       CategoryId: '',
       CompanyId: '',
       StoreId: '',
-      RemainingQuantity: '',
-      TotalSoldQuantity: '',
       ReturnedQuantity: '',
       Unit: ''
     });
@@ -126,8 +124,6 @@ const ProductPage = memo(
       categoryName: product.categoryName,
       companyName: product.companyName,
       storeName: product.storeName,
-      remainingQuantity: product.remainingQuantity,
-      totalSoldQuantity: product.totalSoldQuantity,
       returnedQuantity: product.returnedQuantity,
       unit: product.unit,
       categoryId: product.categoryId,
@@ -150,7 +146,7 @@ const ProductPage = memo(
     });
 
     const handleInputChange = (section, field) => (event) => {
-      const value = ['PurchasePrice', 'SalePrice', 'QuantityInStock', 'CategoryId', 'CompanyId', 'StoreId', 'RemainingQuantity', 'TotalSoldQuantity', 'ReturnedQuantity'].includes(field)
+      const value = ['PurchasePrice', 'SalePrice', 'QuantityInStock', 'CategoryId', 'CompanyId', 'StoreId', 'ReturnedQuantity'].includes(field)
         ? Number(event.target.value)
         : event.target.value;
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -228,8 +224,6 @@ const ProductPage = memo(
       { accessor: 'categoryName', header: 'Category', flex: 1, minWidth: 150 },
       { accessor: 'companyName', header: 'Company', flex: 1, minWidth: 150 },
       { accessor: 'storeName', header: 'Store', flex: 1, minWidth: 150 },
-      { accessor: 'remainingQuantity', header: 'Remaining', flex: 1, minWidth: 100 },
-      { accessor: 'totalSoldQuantity', header: 'Sold', flex: 1, minWidth: 100 },
       { accessor: 'returnedQuantity', header: 'Returned', flex: 1, minWidth: 100 },
       { accessor: 'unit', header: 'Unit', flex: 1, minWidth: 100 },
     ];
@@ -253,8 +247,6 @@ const ProductPage = memo(
             CategoryId: item.categoryId,
             CompanyId: item.companyId,
             StoreId: item.storeId,
-            RemainingQuantity: item.remainingQuantity,
-            TotalSoldQuantity: item.totalSoldQuantity,
             ReturnedQuantity: item.returnedQuantity,
             Unit: item.unit
           });

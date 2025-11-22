@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { loginUser } from '../api/auth';
+import { GetAuthorizedPersonInfo } from '../api/CompanyStoreUser';
 
 export const AuthContext = createContext();
 
@@ -8,9 +9,24 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+  const [userTabs, setUserTabs] = useState([]);
 
   useEffect(() => {
-    
+    const fetchUserRole = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const roleInfo = await GetAuthorizedPersonInfo();
+          console.log('User role info:', roleInfo);
+          setUserRole(roleInfo.role);
+          setUserTabs(roleInfo.tabs || []);
+        } catch (error) {
+          console.error('Failed to fetch user role:', error);
+        }
+      }
+    };
+
     const token = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
     
@@ -22,6 +38,7 @@ export const AuthProvider = ({ children }) => {
         if (parsedUser && typeof parsedUser === 'object') {
           setIsAuthenticated(true);
           setUser(parsedUser);
+          fetchUserRole();
         } else {
           console.error('Invalid user data in localStorage');
           localStorage.removeItem('user');
@@ -44,6 +61,17 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
       setIsAuthenticated(true);
+      
+      // Fetch user role after login
+      try {
+        const roleInfo = await GetAuthorizedPersonInfo();
+        console.log('User role info:', roleInfo);
+        setUserRole(roleInfo.role);
+        setUserTabs(roleInfo.tabs || []);
+      } catch (error) {
+        console.error('Failed to fetch user role:', error);
+      }
+      
       return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
@@ -56,10 +84,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
+    setUserRole(null);
+    setUserTabs([]);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout, userRole, userTabs }}>
       {children}
     </AuthContext.Provider>
   );

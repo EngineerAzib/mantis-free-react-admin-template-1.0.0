@@ -151,26 +151,6 @@ const ProductFormStep = ({
       </Select>
       <TextField
         fullWidth
-        label="Remaining Quantity"
-        type="number"
-        value={formData.RemainingQuantity || ''}
-        onChange={handleInputChange('product', 'RemainingQuantity')}
-        inputProps={{ min: '0' }}
-        sx={fieldStyles}
-      />
-      
-      <TextField
-        fullWidth
-        label="Total Sold Quantity"
-        type="number"
-        value={formData.TotalSoldQuantity || ''}
-        onChange={handleInputChange('product', 'TotalSoldQuantity')}
-        inputProps={{ min: '0' }}
-        sx={fieldStyles}
-      />
-      
-      <TextField
-        fullWidth
         label="Returned Quantity"
         type="number"
         value={formData.ReturnedQuantity || ''}
@@ -217,8 +197,6 @@ ProductFormStep.propTypes = {
     CategoryId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     CompanyId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     StoreId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    RemainingQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    TotalSoldQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     ReturnedQuantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     Unit: PropTypes.string,
   }),
