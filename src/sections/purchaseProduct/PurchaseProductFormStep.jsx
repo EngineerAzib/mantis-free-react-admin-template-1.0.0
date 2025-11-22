@@ -76,7 +76,7 @@ const PurchaseProductFormStep = ({
     };
   }, []);
 
-  // Sync selectedSupplier with formData.SupplierId
+  // Sync selectedSupplier with formData.SupplierId  
   useEffect(() => {
     if (formData.SupplierId && !selectedSupplier) {
       // Fetch supplier details if SupplierId exists but selectedSupplier is not set
@@ -90,7 +90,7 @@ const PurchaseProductFormStep = ({
             }
             return prev;
           });
-        }
+        } 
       });
     }
   }, [formData.SupplierId]);
@@ -302,8 +302,11 @@ const PurchaseProductFormStep = ({
       <Autocomplete
         options={products}
         getOptionLabel={(option) => option.name || ''}
-        value={products.find(p => p.id === formData.ProductId) || null}
-        onChange={(event, newValue) => handleInputChange('purchase', 'ProductId')(null, newValue?.id || '')}
+        value={products.find(p => String(p.id) === String(formData.ProductId)) || null}
+        onChange={(event, newValue) => {
+          const productId = newValue?.id !== undefined && newValue?.id !== null ? newValue.id : '';
+          handleInputChange('purchase', 'ProductId')(null, productId);
+        }}
         onInputChange={handleProductSearch}
         renderInput={(params) => (
           <TextField
@@ -328,10 +331,11 @@ const PurchaseProductFormStep = ({
       <Autocomplete
         options={suppliers}
         getOptionLabel={(option) => option.name || ''}
-        value={selectedSupplier}
+        value={selectedSupplier || (formData.SupplierId ? suppliers.find(s => String(s.id) === String(formData.SupplierId)) : null)}
         onChange={(event, newValue) => {
           setSelectedSupplier(newValue);
-          handleInputChange('purchase', 'SupplierId')(null, newValue?.id || '');
+          const supplierId = newValue?.id !== undefined && newValue?.id !== null ? newValue.id : '';
+          handleInputChange('purchase', 'SupplierId')(null, supplierId);
         }}
         onInputChange={handleSupplierSearch}
         renderInput={(params) => (
@@ -356,11 +360,11 @@ const PurchaseProductFormStep = ({
       />
       <Select
         fullWidth
-        value={formData.CompanyId || ''}
+        value={formData.CompanyId !== undefined && formData.CompanyId !== null && formData.CompanyId !== '' ? formData.CompanyId : ''}
         onChange={handleInputChange('purchase', 'CompanyId')}
         displayEmpty
         renderValue={(selected) => {
-          if (!selected) return 'Select Company';
+          if (!selected || selected === '') return 'Select Company';
           const company = companiesData.find(c => String(c.id) === String(selected));
           return company?.name || 'Selected Company';
         }}
@@ -376,12 +380,12 @@ const PurchaseProductFormStep = ({
       </Select>
       <Select
         fullWidth
-        value={formData.StoreId || ''}
+        value={formData.StoreId !== undefined && formData.StoreId !== null && formData.StoreId !== '' ? formData.StoreId : ''}
         onChange={handleInputChange('purchase', 'StoreId')}
         displayEmpty
         disabled={!formData.CompanyId}
         renderValue={(selected) => {
-          if (!selected) return 'Select Store';
+          if (!selected || selected === '') return 'Select Store';
           const store = storesData.find(s => String(s.id) === String(selected));
           return store?.name || 'Selected Store';
         }}

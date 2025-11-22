@@ -151,10 +151,24 @@ const PurchaseProductPage = memo(
         'CompanyId',
         'StoreId'
       ];
-      setFormData(prev => ({
-        ...prev,
-        [field]: numericFields.includes(field) ? (newValue ? Number(newValue) : '') : newValue
-      }));
+      setFormData(prev => {
+        let processedValue;
+        if (numericFields.includes(field)) {
+          // For ID fields, preserve the value even if it's 0, but convert empty strings to ''
+          if (field === 'ProductId' || field === 'SupplierId' || field === 'CompanyId' || field === 'StoreId') {
+            processedValue = (newValue === '' || newValue === null || newValue === undefined) ? '' : Number(newValue);
+          } else {
+            // For other numeric fields, convert to number or empty string
+            processedValue = (newValue === '' || newValue === null || newValue === undefined) ? '' : Number(newValue);
+          }
+        } else {
+          processedValue = newValue;
+        }
+        return {
+          ...prev,
+          [field]: processedValue
+        };
+      });
     };
 
     const handleClose = () => {
@@ -191,14 +205,41 @@ const PurchaseProductPage = memo(
       purchaseMutation.mutate();
     };
 
-    const isStepValid = () => {
-      return !!formData.PurchaseNumber &&
-             !!formData.ProductId &&
-             !!formData.SupplierId &&
-             !!formData.CompanyId &&
-             !!formData.StoreId &&
-             !!formData.PurchaseStatus &&
-             !!formData.PaymentStatus;
+    const isStepValid = (step = 0) => {
+      // Check PurchaseNumber (required, non-empty string)
+      const hasPurchaseNumber = formData.PurchaseNumber && formData.PurchaseNumber.toString().trim() !== '';
+      
+      // Check IDs - they should be numbers (including 0) or valid non-empty values
+      const hasProductId = formData.ProductId !== '' && formData.ProductId !== null && formData.ProductId !== undefined;
+      const hasSupplierId = formData.SupplierId !== '' && formData.SupplierId !== null && formData.SupplierId !== undefined;
+      const hasCompanyId = formData.CompanyId !== '' && formData.CompanyId !== null && formData.CompanyId !== undefined;
+      const hasStoreId = formData.StoreId !== '' && formData.StoreId !== null && formData.StoreId !== undefined;
+      
+      // Check status fields (should have default values)
+      const hasPurchaseStatus = formData.PurchaseStatus && formData.PurchaseStatus.trim() !== '';
+      const hasPaymentStatus = formData.PaymentStatus && formData.PaymentStatus.trim() !== '';
+      
+      const isValid = hasPurchaseNumber && hasProductId && hasSupplierId && hasCompanyId && hasStoreId && hasPurchaseStatus && hasPaymentStatus;
+      
+      console.log('Validation check:', {
+        PurchaseNumber: formData.PurchaseNumber,
+        hasPurchaseNumber,
+        ProductId: formData.ProductId,
+        hasProductId,
+        SupplierId: formData.SupplierId,
+        hasSupplierId,
+        CompanyId: formData.CompanyId,
+        hasCompanyId,
+        StoreId: formData.StoreId,
+        hasStoreId,
+        PurchaseStatus: formData.PurchaseStatus,
+        hasPurchaseStatus,
+        PaymentStatus: formData.PaymentStatus,
+        hasPaymentStatus,
+        isValid
+      });
+      
+      return isValid;
     };
 
     const handlePageChange = (tab, newPage) => {
