@@ -47,7 +47,7 @@ const PurchaseProductFormStep = ({
     try {
       const response = await GetSupplier(page, pageSize, searchTerm || null);
       const newSuppliers = response.items.map(supplier => ({
-        id: supplier.supplierId,
+        id: supplier.id,
         name: supplier.supplierName
       }));
       // Ensure selected supplier persists in the list
