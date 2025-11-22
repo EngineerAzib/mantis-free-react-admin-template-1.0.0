@@ -38,7 +38,7 @@ export const GetPurchaseProduct = async (pageNumber = 1, pageSize = 10, filter =
 
 export const AddPurchaseProduct = async (payload) => {
   try {
-    const response = await axiosInstance.post('/PurchaseProduct/AddPurchaseProduct', payload);
+    const response = await axiosInstance.post('/PurchaseOrder/AddPurchaseOrder', payload);
     return response.data;
   } catch (error) {
     console.error('Error creating purchase product:', error);
