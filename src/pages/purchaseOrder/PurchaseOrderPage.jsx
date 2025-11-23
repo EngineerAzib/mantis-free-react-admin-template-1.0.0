@@ -51,9 +51,11 @@ const PurchaseProductPage = memo(
     // Fetch companies
     useEffect(() => {
       getCompanies().then(data => {
-        const transformedCompanies = data.map(company => ({
-          id: company.companyId,
-          name: company.companyName
+        // Handle both array and object with items property
+        const companiesArray = Array.isArray(data) ? data : (data?.items || []);
+        const transformedCompanies = companiesArray.map(company => ({
+          id: company.companyId || company.id,
+          name: company.companyName || company.name
         }));
         console.log('Transformed companies:', transformedCompanies);
         setCompanies(transformedCompanies);
@@ -67,9 +69,11 @@ const PurchaseProductPage = memo(
     useEffect(() => {
       if (formData.CompanyId) {
         getStoresByCompany(formData.CompanyId).then(data => {
-          const transformedStores = data.map(store => ({
-            id: store.storeId,
-            name: store.storeName
+          // Handle both array and object with items property
+          const storesArray = Array.isArray(data) ? data : (data?.items || []);
+          const transformedStores = storesArray.map(store => ({
+            id: store.storeId || store.id,
+            name: store.storeName || store.name
           }));
           console.log('Transformed stores:', transformedStores);
           setStores(transformedStores);

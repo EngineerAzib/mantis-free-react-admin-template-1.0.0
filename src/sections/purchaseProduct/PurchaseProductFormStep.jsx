@@ -30,7 +30,7 @@ const PurchaseProductFormStep = ({
     try {
       const response = await GetProduct(page, pageSize, searchTerm || null);
       const newProducts = response.items.map(product => ({
-        id: product.productId,
+        id: product.productId || product.id,
         name: product.name
       }));
       setProducts(prev => page === 1 ? newProducts : [...prev, ...newProducts]);
@@ -47,7 +47,7 @@ const PurchaseProductFormStep = ({
     try {
       const response = await GetSupplier(page, pageSize, searchTerm || null);
       const newSuppliers = response.items.map(supplier => ({
-        id: supplier.id,
+        id: supplier.id || supplier.supplierId,
         name: supplier.supplierName
       }));
       // Ensure selected supplier persists in the list
@@ -81,12 +81,13 @@ const PurchaseProductFormStep = ({
     if (formData.SupplierId && !selectedSupplier) {
       // Fetch supplier details if SupplierId exists but selectedSupplier is not set
       GetSupplier(1, pageSize, null).then(response => {
-        const supplier = response.items.find(s => s.supplierId === formData.SupplierId);
+        const supplier = response.items.find(s => (s.id === formData.SupplierId || s.supplierId === formData.SupplierId));
         if (supplier) {
-          setSelectedSupplier({ id: supplier.supplierId, name: supplier.supplierName });
+          const supplierId = supplier.id || supplier.supplierId;
+          setSelectedSupplier({ id: supplierId, name: supplier.supplierName });
           setSuppliers(prev => {
-            if (!prev.some(s => s.id === supplier.supplierId)) {
-              return [{ id: supplier.supplierId, name: supplier.supplierName }, ...prev];
+            if (!prev.some(s => s.id === supplierId)) {
+              return [{ id: supplierId, name: supplier.supplierName }, ...prev];
             }
             return prev;
           });
