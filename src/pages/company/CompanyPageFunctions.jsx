@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { GetCompany, GetStore, GetUsers, CompanyStoreUser, AddUser, GetAuthorizedPersonInfo } from '../../api/CompanyStoreUser';
+import { GetCompany, GetStore,AddStore, GetUsers, CompanyStoreUser, AddUser, GetAuthorizedPersonInfo } from '../../api/CompanyStoreUser';
 import { Box, Typography } from '@mui/material';
 import { Mail, Phone, MapPin, Calendar } from 'lucide-react';
 
