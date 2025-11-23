@@ -420,7 +420,7 @@ export const handleUserSubmit = async (formData, companiesData, storesData, onSu
       StoreId: storeId ? parseInt(storeId) : null,
       Password: password,
       ConfirmPassword: confirmPassword,
-      Role: role
+      Role: role.trim()
     };
 
     // Call the AddUser API
