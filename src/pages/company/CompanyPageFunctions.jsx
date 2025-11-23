@@ -395,8 +395,22 @@ export const handleStoreSubmit = async (formData, companiesData, storesData, onS
 export const handleUserSubmit = async (formData, companiesData, storesData, onSubmit, queryClient, setMessage, handleClose) => {
   const { username, email, fullName, address, cnic, phoneNumber, gender, role, companyId, storeId, password, confirmPassword, joinDate } = formData.user;
   
+  // Clean and validate role - ensure it's a string
+  let cleanRole = '';
+  if (role) {
+    if (typeof role === 'string') {
+      // Remove any invalid characters and trim
+      cleanRole = role.replace(/[^\x20-\x7E]/g, '').trim();
+    } else if (typeof role === 'object' && role !== null) {
+      // If role is an object, extract the name property
+      cleanRole = (role.name || role.roleName || String(role)).replace(/[^\x20-\x7E]/g, '').trim();
+    } else {
+      cleanRole = String(role).replace(/[^\x20-\x7E]/g, '').trim();
+    }
+  }
+  
   // Validation
-  if (!username || !email || !fullName || !role || !password || !confirmPassword) {
+  if (!username || !email || !fullName || !cleanRole || !password || !confirmPassword) {
     setMessage({ open: true, message: 'Username, email, full name, role, and passwords are required!', severity: 'error' });
     return;
   }
@@ -407,21 +421,24 @@ export const handleUserSubmit = async (formData, companiesData, storesData, onSu
   }
 
   try {
-    // Prepare user data for API
+    // Prepare user data for API - ensure all string fields are properly cleaned
     const userData = {
-      Username: username,
-      Email: email,
-      FullName: fullName,
-      Address: address || '',
-      CNIC: cnic || '',
-      PhoneNumber: phoneNumber || '',
-      Gender: gender || '',
+      Username: String(username).trim(),
+      Email: String(email).trim(),
+      FullName: String(fullName).trim(),
+      Address: address ? String(address).trim() : '',
+      CNIC: cnic ? String(cnic).trim() : '',
+      PhoneNumber: phoneNumber ? String(phoneNumber).trim() : '',
+      Gender: gender ? String(gender).trim() : '',
       CompanyId: companyId ? parseInt(companyId) : null,
       StoreId: storeId ? parseInt(storeId) : null,
-      Password: password,
-      ConfirmPassword: confirmPassword,
-      Role: role?.trim() || ''
+      Password: String(password),
+      ConfirmPassword: String(confirmPassword),
+      Role: cleanRole
     };
+    
+    // Log the cleaned data for debugging
+    console.log('Cleaned user data being sent:', userData);
 
     // Call the AddUser API
     const response = await AddUser(userData);
