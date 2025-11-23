@@ -158,8 +158,8 @@ export const getTableColumns = (activeTab) => {
                 fontSize: '0.75rem',
                 fontWeight: 'medium',
                 borderRadius: '999px',
-                bgcolor: value === 'true' ? 'success.light' : 'error.light',
-                color: value === 'false' ? 'success.dark' : 'error.dark',
+                bgcolor: value === true ? 'success.light' : 'error.light',
+                color: value === false ? 'success.dark' : 'error.dark',
                 display: 'inline-block',
               }}
             >
@@ -198,8 +198,8 @@ export const getTableColumns = (activeTab) => {
                 fontSize: '0.75rem',
                 fontWeight: 'medium',
                 borderRadius: '999px',
-                bgcolor: value === true ? 'success.light' : 'error.light',
-                color: value === false ? 'success.dark' : 'error.dark',
+                bgcolor: value === 'true' ? 'success.light' : 'error.light',
+                color: value === 'false' ? 'success.dark' : 'error.dark',
                 display: 'inline-block',
               }}
             >
