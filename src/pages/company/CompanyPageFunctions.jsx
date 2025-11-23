@@ -51,7 +51,7 @@ export const initialStoresData = async (pageNumber = 1, pageSize = 10, searchTex
 
 export const initialUsersData = async (pageNumber = 1, pageSize = 10, searchText = '') => {
   try {
-    debugger
+  
     const filter = searchText ;
     const response = await GetUsers(pageNumber, pageSize, filter);
     console.log('Fetched users:', response);
@@ -375,8 +375,8 @@ export const handleStoreSubmit = async (formData, companiesData, storesData, onS
     };
 
     // If you're making an API call:
-    // const response = await CreateStore(newStore);
-    
+     const response = await CompanyStoreUser(newStore);
+     console.log('Store creation response:', response);
     // Update local cache
     queryClient.setQueryData(['stores', 1, 10, ''], (old = { items: [], totalCount: 0 }) => ({
       items: [...old.items, newStore],
