@@ -375,7 +375,7 @@ export const handleStoreSubmit = async (formData, companiesData, storesData, onS
     };
 
     // If you're making an API call:
-     const response = await CompanyStoreUser(newStore);
+     const response = await AddStore(newStore);
      console.log('Store creation response:', response);
     // Update local cache
     queryClient.setQueryData(['stores', 1, 10, ''], (old = { items: [], totalCount: 0 }) => ({

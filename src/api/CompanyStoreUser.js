@@ -79,6 +79,16 @@ export const CompanyStoreUser = async (payload) => {
     throw error;
   }
 };
+export const AddStore = async (payload) => {
+  try {
+    console.log('AddStore called with payload:', payload);
+    const response = await axiosInstance.post('/Store/AddStore', payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding store:', error);
+    throw error;
+  }
+};
 
 // Add User API
 export const AddUser = async (userData) => {
