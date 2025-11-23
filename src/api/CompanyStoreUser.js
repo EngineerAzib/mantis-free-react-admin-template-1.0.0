@@ -84,7 +84,7 @@ export const CompanyStoreUser = async (payload) => {
 export const AddUser = async (userData) => {
   try {
     console.log('AddUser called with userData:', userData);
-    const response = await axiosInstance.post('/Auth/AddUser', userData);
+    const response = await axiosInstance.post('/Auth/register', userData);
     return response.data;
   } catch (error) {
     console.error('Error adding user:', error);
