@@ -130,7 +130,7 @@ export const getTableColumns = (activeTab) => {
         },
       ];
     case 'stores':
-      console.log('Stores data:', storesData);
+     // console.log('Stores data:', storesData);
       return [
         { header: 'Store Name', accessor: 'name' },
         { header: 'Company', accessor: 'companyName' },
