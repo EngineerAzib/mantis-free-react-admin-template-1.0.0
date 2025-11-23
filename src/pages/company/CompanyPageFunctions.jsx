@@ -132,7 +132,7 @@ export const getTableColumns = (activeTab) => {
     case 'stores':
      // console.log('Stores data:', storesData);
       return [
-        { header: 'Store Name', accessor: 'name' },
+        { header: 'Store Name', accessor: 'storeName' },
         { header: 'Company', accessor: 'companyName' },
         {
           header: 'Location',
@@ -144,12 +144,12 @@ export const getTableColumns = (activeTab) => {
             </Box>
           ),
         },
-        { header: 'Type', accessor: 'type' },
-        { header: 'Manager', accessor: 'manager' },
-        { header: 'Employees', accessor: 'employees' },
+        { header: 'Email', accessor: 'email' },
+        { header: 'Phone', accessor: 'phone' },
+     
         {
           header: 'Status',
-          accessor: 'status',
+          accessor: 'isActive',
           render: (value) => (
             <Box
               sx={{
@@ -158,8 +158,8 @@ export const getTableColumns = (activeTab) => {
                 fontSize: '0.75rem',
                 fontWeight: 'medium',
                 borderRadius: '999px',
-                bgcolor: value === 'Active' ? 'success.light' : 'error.light',
-                color: value === 'Active' ? 'success.dark' : 'error.dark',
+                bgcolor: value === 'true' ? 'success.light' : 'error.light',
+                color: value === 'false' ? 'success.dark' : 'error.dark',
                 display: 'inline-block',
               }}
             >
@@ -170,7 +170,8 @@ export const getTableColumns = (activeTab) => {
       ];
     case 'users':
       return [
-        { header: 'Name', accessor: 'name' },
+        { header: 'Name', accessor: 'fullName' },
+        {header:'User Name', accessor: 'userName'},
         {
           header: 'Email',
           accessor: 'email',
@@ -181,22 +182,14 @@ export const getTableColumns = (activeTab) => {
             </Box>
           ),
         },
+        { header: 'Phone', accessor: 'phoneNumber' },
         { header: 'Role', accessor: 'role' },
         { header: 'Company', accessor: 'companyName' },
         { header: 'Store', accessor: 'storeName' },
-        {
-          header: 'Join Date',
-          accessor: 'joinDate',
-          render: (value) => (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.875rem' }}>
-              <Calendar size={14} color="grey.500" />
-              {new Date(value).toLocaleDateString()}
-            </Box>
-          ),
-        },
+      
         {
           header: 'Status',
-          accessor: 'status',
+          accessor: 'isActive',
           render: (value) => (
             <Box
               sx={{
@@ -205,8 +198,8 @@ export const getTableColumns = (activeTab) => {
                 fontSize: '0.75rem',
                 fontWeight: 'medium',
                 borderRadius: '999px',
-                bgcolor: value === 'Active' ? 'success.light' : 'error.light',
-                color: value === 'Active' ? 'success.dark' : 'error.dark',
+                bgcolor: value === true ? 'success.light' : 'error.light',
+                color: value === false ? 'success.dark' : 'error.dark',
                 display: 'inline-block',
               }}
             >
